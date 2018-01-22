@@ -77,7 +77,7 @@ function draw() {
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`GAMEOVER`, 400, height / 2)
+    text(`GAME OVER`, 400, height / 2)
     text(`Press "P" to play again.`, 400, height / 2 + 50);
     stars.forEach(s => {
       s.remove();
