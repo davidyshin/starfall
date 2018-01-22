@@ -1,5 +1,6 @@
 let base, ship, ship_image, bullets, stars, hp_bar
-let gameover = false
+let gameStarted = false
+let gameOver = false
 let hiscore = 0
 let score = 0
 let level = 1
@@ -25,7 +26,19 @@ function setup() {
 
 
 function draw() {
-  if (!gameover) {
+  if (!gameStarted) {
+    textSize(30)
+    clear()
+    background(0)
+    textAlign(CENTER)
+    fill(255, 255, 255)
+    text(`Welcome to Starfall.`, 400, height / 2)
+    text(`Press "Space" to start.`, 400, height / 2 + 50);
+    if (keyWentDown("space")) {
+      gameStarted = true
+    }
+  }
+  if (!gameOver && gameStarted) {
     clear()
     background(0)
     textAlign(CENTER);
@@ -35,7 +48,6 @@ function draw() {
     let score_text = text(`Score: ${score}`, 700, 35);
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
     let level_text = text(`LEVEL: ${level}`, 50, 35)
-    textAlign(CENTER);
     let control_text = text("Z: Left | X: Right | C: Shoot", width / 2, 65);
 
     //draw all the sprites added to the sketch so far
@@ -69,11 +81,12 @@ function draw() {
       bullets.add(bullet)
     }
 
+
     stars.overlap(bullets, starHit);
     stars.overlap(base, baseHit)
 
     drawSprites();
-  } else {
+  } else if (gameOver) {
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
@@ -83,7 +96,7 @@ function draw() {
       s.remove();
     })
   }
-  if (keyWentDown("p") && gameover) {
+  if (keyWentDown("p") && gameOver) {
     hp = 100
     score = 0
     hp_bar.width = 800
@@ -92,7 +105,7 @@ function draw() {
     while (stars.length < 20) {
       createStar();
     }
-    gameover = false
+    gameOver = false
   }
   // Levels 2-11 determined by score
   switch (score) {
@@ -167,7 +180,7 @@ function baseHit(star) {
     hp = 0
     hp_bar.width = 0
     setTimeout(() => {
-      gameover = true
+      gameOver = true
     }, 300)
   }
   star.remove()
