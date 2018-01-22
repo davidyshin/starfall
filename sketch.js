@@ -64,7 +64,7 @@ function draw() {
 
     if (keyWentDown("c")) {
       let bullet = createSprite(ship.position.x, 525, 3, 10);
-      bullet.setSpeed(5, ship.rotation - 90);
+      bullet.setSpeed(10, ship.rotation - 90);
       bullet.life = 100;
       bullets.add(bullet)
     }
