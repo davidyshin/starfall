@@ -48,33 +48,33 @@ function draw() {
     let score_text = text(`Score: ${score}`, 700, 35);
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
     let level_text = text(`LEVEL: ${level}`, 50, 35)
-    let control_text = text("Z: Left | X: Right | C: Shoot", width / 2, 65);
+    let control_text = text("<- : Left | -> : Right | Z: Shoot", width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
-    if (keyDown("z")) {
+    if (keyDown("left")) {
       if (ship.position.x > 50) {
         ship.velocity.x = -27;
       } else {
         ship.velocity.x = 0
       }
     }
-    if (keyWentUp("z")) {
+    if (keyWentUp("left")) {
       ship.velocity.x = 0;
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
-    if (keyDown("x")) {
+    if (keyDown("right")) {
       if (ship.position.x < 750) {
         ship.velocity.x = +27;
       } else {
         ship.velocity.x = 0
       }
     }
-    if (keyWentUp("x")) {
+    if (keyWentUp("right")) {
       ship.velocity.x = 0;
     }
 
-    if (keyWentDown("c")) {
+    if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, 525, 3, 10);
       bullet.setSpeed(10, ship.rotation - 90);
       bullet.life = 100;
@@ -158,7 +158,7 @@ function draw() {
 // stars fall with speed according to gravity
 function createStar() {
   let star = createSprite((random(50, 750)),
-    (random(-100, -3000)), 30, 30);
+    (random(-200, -3000)), 30, 30);
   star.addSpeed(grav, 90)
   star.rotationSpeed = 15
   stars.add(star)
