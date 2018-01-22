@@ -6,6 +6,7 @@ let score = 0
 let level = 1
 let grav = 2
 let hp = 100
+window.event.preventDefault()
 
 function setup() {
   stars = new Group();
@@ -158,7 +159,7 @@ function draw() {
 // stars fall with speed according to gravity
 function createStar() {
   let star = createSprite((random(50, 750)),
-    (random(-200, -3000)), 30, 30);
+    (random(-100, -3000)), 30, 30);
   star.addSpeed(grav, 90)
   star.rotationSpeed = 15
   stars.add(star)
