@@ -14,7 +14,7 @@ function setup() {
   ship = createSprite(400, 550, 20, 20)
   base = createSprite(400, 589, 800, 20)
   hp_bar = createSprite(400, 11, 800, 20)
-  base.shapeColor = color(222, 125, 2)
+  base.shapeColor = color(0, 174, 255)
   hp_bar.shapeColor = color(0, 253, 47)
   for (let i = 0; i < 25; i++) {
     createStar()
@@ -94,6 +94,7 @@ function draw() {
     }
     gameover = false
   }
+  // Levels 2-11 determined by score
   switch (score) {
     case 20:
       level = 2;
@@ -140,20 +141,26 @@ function draw() {
     hiscore = score
   }
 }
-
+// creates star in y position -100 between x positions 50-750
+// stars fall with speed according to gravity
 function createStar() {
   let star = createSprite((random(50, 750)),
     (random(-100, -3000)), 30, 30);
   star.addSpeed(grav, 90)
-  star.rotationSpeed = 10
+  star.rotationSpeed = 15
   stars.add(star)
 }
 
+
+// if the base platform is hit hp is minused 10
+// hp_bar sprite (rectangle with width of 800) loses 80 width (10% of 800)
 function baseHit(star) {
   if (hp > 10) {
     hp -= 10
     hp_bar.width -= 80
-    if (hp <= 40 && hp >= 20) {
+    if (hp <= 50 && hp >= 30) {
+      hp_bar.shapeColor = color(255, 156, 0)
+    } else if (hp <= 30 && hp >= 10) {
       hp_bar.shapeColor = color(247, 10, 10)
     }
   } else {
