@@ -1,6 +1,8 @@
 let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosion
 let gameStarted = false
 let gameOver = false
+let paused = false;
+
 let hiscore = 0
 let score = 0
 let level = 1
@@ -34,6 +36,7 @@ function setup() {
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   // creating 25 stars
+
 }
 
 
@@ -71,7 +74,8 @@ function draw() {
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
     let level_text = text(`Level: ${level}`, 50, 35)
     let control_text = text(`← Move Left | Move Right →
-Z : Shoot `, width / 2, 65);
+Z : Shoot
+P : Pause`, width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
@@ -96,6 +100,7 @@ Z : Shoot `, width / 2, 65);
     if (keyWentUp("right")) {
       ship.setSpeed(1.5, 0);
     }
+
     if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, ship.position.y * .985, 8, 18);
       bullet.addImage(bullet_image)
@@ -118,14 +123,14 @@ Z : Shoot `, width / 2, 65);
     textAlign(CENTER)
     fill(255, 255, 255)
     text('GAME OVER', width / 2, height / 2)
-    text('Press "P" to play again.', width / 2, height / 2 + 50);
+    text('Press "R" to play again.', width / 2, height / 2 + 50);
     stars.forEach(s => {
       s.remove();
     })
   }
   // if gamesover and "p" is clicked, game is reset
   // hp 100, score 0, 25 more stars
-  if (keyWentDown("p") && gameOver) {
+  if (keyWentDown("r") && gameOver) {
     hp = 100
     score = 0
     level = 1
@@ -217,6 +222,8 @@ function createStar() {
 }
 
 
+
+
 // if the base platform is hit hp is minused 10
 // hp_bar sprite (rectangle with width of 800) loses 80 width (10% of 800)
 function baseHit(star) {
@@ -269,4 +276,15 @@ function starHit(star, bullet) {
     p.friction = .10
   }
   bullet.remove();
+}
+
+function keyPressed() {
+  if (keyCode === 80) {
+    paused = !paused
+    if (paused && gameStarted) {
+      noLoop()
+    } else {
+      loop()
+    }
+  }
 }
