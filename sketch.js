@@ -132,7 +132,7 @@ Z : Shoot `, width / 2, 65);
     hp = 100
     score = 0
     level = 1
-    grav = 0
+    grav = 2
     hp_bar.width = width
     hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
