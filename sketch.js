@@ -1,4 +1,4 @@
-let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage
+let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage, explosion
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
@@ -14,6 +14,8 @@ function preload() {
   star_image = loadImage("assets/star.png");
   particleImage = loadImage("assets/particle.png");
   particleImage2 = loadImage("assets/particle2.png");
+  explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
+
 }
 
 
@@ -226,6 +228,10 @@ function baseHit(star) {
       gameOver = true
     }, 300)
   }
+  let e = createSprite(star.position.x, star.position.y);
+  e.life = 50
+  e.addAnimation("explode", explosion)
+  animation(explosion, 50, 50)
   star.remove()
 }
 
@@ -234,8 +240,8 @@ function starHit(star, bullet) {
   star.remove();
   createStar()
   score += 1
-  for (var i = 0; i < 10; i++) {
-    var p = createSprite(bullet.position.x, bullet.position.y);
+  for (let i = 0; i < 10; i++) {
+    let p = createSprite(bullet.position.x, bullet.position.y);
     if (i % 2 === 0) {
       p.addImage(particleImage);
     } else {
