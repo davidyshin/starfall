@@ -29,9 +29,6 @@ function setup() {
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   // creating 25 stars
-  for (let i = 0; i < 25; i++) {
-    createStar()
-  }
 }
 
 
@@ -52,6 +49,9 @@ function draw() {
     }
   }
   if (!gameOver && gameStarted) {
+    while (stars.length <= 25) {
+      createStar()
+    }
     // if gameover is false/gamestarted is true
     // game renders normally
     clear()
@@ -71,25 +71,36 @@ Z : Shoot `, width / 2, 65);
     //the positions will be updated automatically at every cycle
     if (keyDown("left")) {
       if (ship.position.x > 50) {
-        ship.velocity.x = -27;
+        ship.setSpeed(30, 180);
       } else {
-        ship.velocity.x = 0
+        ship.setSpeed(0, 180)
       }
     }
     if (keyWentUp("left")) {
-      ship.velocity.x = 0;
+      ship.setSpeed(0, 0);
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
       if (ship.position.x < 750) {
-        ship.velocity.x = +27;
+        ship.setSpeed(30, 0);
       } else {
-        ship.velocity.x = 0
+        ship.setSpeed(0, 0)
       }
     }
     if (keyWentUp("right")) {
-      ship.velocity.x = 0;
+      ship.setSpeed(0, 0);
     }
+    //if mouse is to the left
+    // if (mouseX < ship.position.x - 20) {
+    //   //flip horizontally
+    //   ship.mirrorX(-1);
+    //   //negative x velocity: move left
+    //   ship.velocity.x = -5;
+    // } else if (mouseX > ship.position.x + 20) {
+    //   //unflip
+    //   ship.mirrorX(1);
+    //   ship.velocity.x = 5;
+    // }
 
     if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, ship.position.y * .985, 3, 10);
@@ -108,12 +119,8 @@ Z : Shoot `, width / 2, 65);
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`
-        GAME OVER `, width / 2, height / 2)
-    text(`
-        Press "P"
-        to play again.
-        `, width / 2, height / 2 + 50);
+    text('GAME OVER', width / 2, height / 2)
+    text('Press "P" to play again.', width / 2, height / 2 + 50);
     stars.forEach(s => {
       s.remove();
     })
