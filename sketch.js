@@ -48,7 +48,8 @@ function draw() {
     textAlign(CENTER)
     fill(255, 255, 255)
     text(`Welcome to Starfall.`, width / 2, height / 2)
-    text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
+    text("Protect your city from the falling stars.", width / 2, height / 1.7)
+    text(`Press "Space" or Click to start.`, width / 2, height / 1.5);
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
       gameStarted = true
     }
