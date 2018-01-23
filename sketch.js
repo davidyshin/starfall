@@ -110,7 +110,7 @@ Z : Shoot `, width / 2, 65);
     // }
 
     if (keyWentDown("z")) {
-      let bullet = createSprite(ship.position.x, ship.position.y * .985, 3, 10);
+      let bullet = createSprite(ship.position.x, ship.position.y * .985, 7, 17);
       bullet.addImage(bullet_image)
       bullet.setSpeed(10, 270);
       bullet.life = 50;
@@ -206,7 +206,7 @@ Z : Shoot `, width / 2, 65);
 
 function createStar() {
   let star = createSprite((random(50, 750)),
-    (random(-100, -3000)), 40, 40);
+    (random(-100, -3000)), 50, 50);
   star.addSpeed(grav, 90)
   star.rotationSpeed = 3
   stars.add(star)
@@ -234,6 +234,7 @@ function baseHit(star) {
   }
   // e.life = 50
   // e.addAnimation("explode", explosion)
+  // creates 35 particles on basehit (particleimage1,2,3 red,yellow,white circles)
   for (let i = 0; i < 35; i++) {
     let e = createSprite(star.position.x, star.position.y + 20);
     if (i % 3 === 0) {
@@ -243,7 +244,7 @@ function baseHit(star) {
     } else {
       e.addImage(particleImage3)
     }
-    e.setSpeed(random(2, 5), random(180, 360));
+    e.setSpeed(random(2, 5), random(90, 360));
     e.friction = .05;
     e.life = 30;
   }
