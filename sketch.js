@@ -20,7 +20,7 @@ function setup() {
   bullets = new Group();
   createCanvas(800, 600);
   frameRate(40);
-  ship = createSprite(width / 2, height * .95, 20, 20)
+  ship = createSprite(width / 2, height * .93, 20, 20)
   ship.addImage(ship_image)
   base = createSprite(width / 2, height * .985, 800, 20)
   hp_bar = createSprite(width / 2, height * .013, width, 20)
@@ -86,7 +86,7 @@ function draw() {
     }
 
     if (keyWentDown("z")) {
-      let bullet = createSprite(ship.position.x, 525, 3, 10);
+      let bullet = createSprite(ship.position.x, ship.position.y * .985, 3, 10);
       bullet.setSpeed(10, ship.rotation - 90);
       bullet.life = 50;
       bullets.add(bullet)
