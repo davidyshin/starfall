@@ -96,24 +96,11 @@ Z : Shoot `, width / 2, 65);
     if (keyWentUp("right")) {
       ship.setSpeed(1.5, 0);
     }
-
-    //if mouse is to the left
-    // if (mouseX < ship.position.x - 20) {
-    //   //flip horizontally
-    //   ship.mirrorX(-1);
-    //   //negative x velocity: move left
-    //   ship.velocity.x = -5;
-    // } else if (mouseX > ship.position.x + 20) {
-    //   //unflip
-    //   ship.mirrorX(1);
-    //   ship.velocity.x = 5;
-    // }
-
     if (keyWentDown("z")) {
-      let bullet = createSprite(ship.position.x, ship.position.y * .985, 7, 17);
+      let bullet = createSprite(ship.position.x, ship.position.y * .985, 8, 18);
       bullet.addImage(bullet_image)
       bullet.setSpeed(10, 270);
-      bullet.life = 50;
+      bullet.life = 55;
       bullets.add(bullet)
     }
 
@@ -147,52 +134,68 @@ Z : Shoot `, width / 2, 65);
     hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
     // stars = new Group();
-    while (stars.length < 25) {
-      createStar();
+    if (stars.length < 30) {
+      createStar()
     }
     gameOver = false
   }
-  // Levels 2-11 determined by score
+  // Levels 1-15 determined by score
   switch (score) {
     case 20:
       level = 2;
-      grav = 4;
+      grav = 3;
       break;
     case 40:
       level = 3;
-      grav = 5;
+      grav = 4;
       break;
     case 60:
       level = 4;
-      grav = 6;
+      grav = 5;
       break;
     case 80:
       level = 5;
-      grav = 7;
+      grav = 5.5;
       break;
     case 100:
       level = 6;
-      grav = 8;
-      break;
-    case 120:
-      level = 7;
-      grav = 9;
+      grav = 6;
       break;
     case 140:
-      level = 8;
-      grav = 10;
-      break;
-    case 160:
-      level = 9;
-      grav = 11;
+      level = 7;
+      grav = 6.5;
       break;
     case 180:
-      level = 10;
-      grav = 12;
+      level = 8;
+      grav = 7;
       break;
     case 200:
+      level = 9;
+      grav = 7.5;
+      break;
+    case 220:
+      level = 10;
+      grav = 8;
+      break;
+    case 240:
       level = 11;
-      grav = 13;
+      grav = 8.5;
+      break;
+    case 260:
+      level = 12;
+      grav = 9;
+      break;
+    case 280:
+      level = 13;
+      grav = 9.5;
+      break;
+    case 300:
+      level = 14;
+      grav = 10;
+      break;
+    case 320:
+      level = 15;
+      grav = 10.5;
       break;
   }
   // if score which starts at 0 is higher than current hiscore, redeclares hiscore
@@ -208,7 +211,7 @@ function createStar() {
   let star = createSprite((random(50, 750)),
     (random(-100, -3000)), 50, 50);
   star.addSpeed(grav, 90)
-  star.rotationSpeed = 3
+  star.rotationSpeed = 2.5
   stars.add(star)
   star.addImage(star_image)
 }
@@ -252,6 +255,7 @@ function baseHit(star) {
 }
 
 function starHit(star, bullet) {
+  star.remove();
   score += 1
   for (let i = 0; i < 15; i++) {
     let p = createSprite(bullet.position.x, bullet.position.y);
@@ -265,6 +269,4 @@ function starHit(star, bullet) {
     p.friction = .10
   }
   bullet.remove();
-  star.remove();
-  createStar();
 }
