@@ -64,7 +64,8 @@ function draw() {
     let score_text = text(`Score: ${score}`, 700, 35);
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
     let level_text = text(`Level: ${level}`, 50, 35)
-    let control_text = text("<- : Left | -> : Right | Z: Shoot", width / 2, 65);
+    let control_text = text(`← Move Left | Move Right →
+Z : Shoot `, width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
@@ -107,8 +108,12 @@ function draw() {
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`GAME OVER`, width / 2, height / 2)
-    text(`Press "P" to play again.`, width / 2, height / 2 + 50);
+    text(`
+        GAME OVER `, width / 2, height / 2)
+    text(`
+        Press "P"
+        to play again.
+        `, width / 2, height / 2 + 50);
     stars.forEach(s => {
       s.remove();
     })
