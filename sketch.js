@@ -1,4 +1,4 @@
-let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage, particleImage2, particleImage3, explosion
+let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, star_image, particleImage, particleImage2, particleImage3, explosion
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
@@ -12,6 +12,7 @@ function preload() {
   // preloading images to use for stars and ship
   ship_image = loadImage("assets/ship.png");
   star_image = loadImage("assets/star.png");
+  bullet_image = loadImage("assets/bullet.png")
   particleImage = loadImage("assets/particle.png");
   particleImage2 = loadImage("assets/particle2.png");
   particleImage3 = loadImage("assets/particle3.png");
@@ -108,6 +109,7 @@ Z : Shoot `, width / 2, 65);
 
     if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, ship.position.y * .985, 3, 10);
+      bullet.addImage(bullet_image)
       bullet.setSpeed(10, 270);
       bullet.life = 50;
       bullets.add(bullet)
