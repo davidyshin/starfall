@@ -6,7 +6,7 @@ let score = 0
 let level = 1
 let grav = 2
 let hp = 100
-
+let button;
 
 function preload() {
   // preloading images to use for stars and ship
@@ -16,7 +16,6 @@ function preload() {
   particleImage2 = loadImage("assets/particle2.png");
   particleImage3 = loadImage("assets/particle3.png");
   explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
-
 }
 
 
