@@ -77,7 +77,7 @@ Z : Shoot `, width / 2, 65);
       }
     }
     if (keyWentUp("left")) {
-      ship.setSpeed(0, 0);
+      ship.setSpeed(1.5, 180);
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
@@ -88,7 +88,7 @@ Z : Shoot `, width / 2, 65);
       }
     }
     if (keyWentUp("right")) {
-      ship.setSpeed(0, 0);
+      ship.setSpeed(1.5, 0);
     }
     //if mouse is to the left
     // if (mouseX < ship.position.x - 20) {
