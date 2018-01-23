@@ -69,11 +69,11 @@ Z : Shoot `, width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
-    if (ship.position.x < 50 || ship.position.x > 750) {
+    if (ship.position.x < 30 || ship.position.x > 750) {
       ship.setSpeed(0, 0);
     }
     if (keyDown("left")) {
-      if (ship.position.x > 60) {
+      if (ship.position.x > 30) {
         ship.setSpeed(25, 180);
       }
     }
@@ -83,7 +83,7 @@ Z : Shoot `, width / 2, 65);
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
-      if (ship.position.x < 740) {
+      if (ship.position.x < 750) {
         ship.setSpeed(25, 0);
       }
     }
@@ -131,6 +131,8 @@ Z : Shoot `, width / 2, 65);
   if (keyWentDown("p") && gameOver) {
     hp = 100
     score = 0
+    level = 1
+    grav = 0
     hp_bar.width = width
     hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
