@@ -4,7 +4,7 @@ let gameOver = false
 let hiscore = 0
 let score = 0
 let level = 1
-let grav = 8
+let grav = 2
 let hp = 100
 
 
