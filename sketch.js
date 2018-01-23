@@ -83,7 +83,7 @@ P : Pause`, width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
-    if (ship.position.x < 30 || ship.position.x > 750) {
+    if (ship.position.x < 50 || ship.position.x > 750) {
       ship.setSpeed(0, 0);
     }
     if (keyDown("left")) {
