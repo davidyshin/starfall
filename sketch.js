@@ -138,6 +138,7 @@ P : Pause`, width / 2, 65);
       }, 3000)
       exploded = true;
     }
+
     stars.forEach(s => {
       s.remove();
     })
@@ -262,11 +263,6 @@ function baseHit(star) {
   } else {
     hp = 0
     hp_bar.width = 0
-    let star = createSprite((random(50, 750)), -100, 50, 50);
-    star.addSpeed(99, 90)
-    star.rotationSpeed = 2.5
-    stars.add(star)
-    star.addImage(star_image)
   }
   if (hp < 10) {
     gameOver = true;
@@ -291,7 +287,6 @@ function baseHit(star) {
 }
 
 function starHit(star, bullet) {
-  console.log("hit")
   star.remove();
 
   for (let i = 0; i < 15; i++) {
