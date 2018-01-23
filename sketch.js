@@ -6,18 +6,19 @@ let score = 0
 let level = 1
 let grav = 2
 let hp = 100
-window.event.preventDefault()
+
 
 function setup() {
   stars = new Group();
   bullets = new Group();
   createCanvas(800, 600);
   frameRate(40);
-  ship = createSprite(400, 550, 20, 20)
-  base = createSprite(400, 589, 800, 20)
-  hp_bar = createSprite(400, 11, 800, 20)
+  ship = createSprite(width / 2, height * .95, 20, 20)
+  base = createSprite(width / 2, height * .985, 800, 20)
+  hp_bar = createSprite(width / 2, height * .013, width, 20)
   base.shapeColor = color(0, 174, 255)
   hp_bar.shapeColor = color(0, 253, 47)
+  ship.shapeColor = color(255, 255, 255)
   for (let i = 0; i < 25; i++) {
     createStar()
   }
@@ -27,15 +28,16 @@ function setup() {
 
 
 function draw() {
+
   if (!gameStarted) {
     textSize(30)
     clear()
     background(0)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`Welcome to Starfall.`, 400, height / 2)
-    text(`Press "Space" to start.`, 400, height / 2 + 50);
-    if (keyWentDown("space")) {
+    text(`Welcome to Starfall.`, width / 2, height / 2)
+    text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
+    if (keyWentDown("space") || mouseWentDown(LEFT)) {
       gameStarted = true
     }
   }
@@ -91,8 +93,8 @@ function draw() {
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`GAME OVER`, 400, height / 2)
-    text(`Press "P" to play again.`, 400, height / 2 + 50);
+    text(`GAME OVER`, width / 2, height / 2)
+    text(`Press "P" to play again.`, width / 2, height / 2 + 50);
     stars.forEach(s => {
       s.remove();
     })
@@ -100,7 +102,7 @@ function draw() {
   if (keyWentDown("p") && gameOver) {
     hp = 100
     score = 0
-    hp_bar.width = 800
+    hp_bar.width = width
     hp_bar.shapeColor = color(0, 253, 47)
     // stars = new Group();
     while (stars.length < 20) {
