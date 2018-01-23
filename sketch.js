@@ -108,7 +108,7 @@ Z : Shoot `, width / 2, 65);
 
     if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, ship.position.y * .985, 3, 10);
-      bullet.setSpeed(10, ship.rotation - 90);
+      bullet.setSpeed(10, 270);
       bullet.life = 50;
       bullets.add(bullet)
     }
@@ -202,7 +202,7 @@ Z : Shoot `, width / 2, 65);
 
 function createStar() {
   let star = createSprite((random(50, 750)),
-    (random(-100, -3000)), 30, 30);
+    (random(-100, -3000)), 40, 40);
   star.addSpeed(grav, 90)
   star.rotationSpeed = 3
   stars.add(star)
@@ -247,9 +247,6 @@ function baseHit(star) {
 }
 
 function starHit(star, bullet) {
-  bullet.remove();
-  star.remove();
-  createStar()
   score += 1
   for (let i = 0; i < 15; i++) {
     let p = createSprite(bullet.position.x, bullet.position.y);
@@ -259,7 +256,10 @@ function starHit(star, bullet) {
       p.addImage(particleImage2)
     }
     p.setSpeed(random(3, 5), random(0, 360));
-    p.friction = .10;
     p.life = 18;
+    p.friction = .10
   }
+  bullet.remove();
+  star.remove();
+  createStar();
 }
