@@ -1,10 +1,10 @@
-let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage, explosion
+let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage, particleImage2, particleImage3, explosion
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
 let score = 0
 let level = 1
-let grav = 2
+let grav = 8
 let hp = 100
 
 
@@ -14,6 +14,7 @@ function preload() {
   star_image = loadImage("assets/star.png");
   particleImage = loadImage("assets/particle.png");
   particleImage2 = loadImage("assets/particle2.png");
+  particleImage3 = loadImage("assets/particle3.png");
   explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
 
 }
@@ -228,10 +229,21 @@ function baseHit(star) {
       gameOver = true
     }, 300)
   }
-  let e = createSprite(star.position.x, star.position.y);
-  e.life = 50
-  e.addAnimation("explode", explosion)
-  animation(explosion, 50, 50)
+  // e.life = 50
+  // e.addAnimation("explode", explosion)
+  for (let i = 0; i < 35; i++) {
+    let e = createSprite(star.position.x, star.position.y + 20);
+    if (i % 3 === 0) {
+      e.addImage(particleImage);
+    } else if (i % 2 === 0) {
+      e.addImage(particleImage2)
+    } else {
+      e.addImage(particleImage3)
+    }
+    e.setSpeed(random(2, 5), random(180, 360));
+    e.friction = .05;
+    e.life = 30;
+  }
   star.remove()
 }
 
@@ -240,7 +252,7 @@ function starHit(star, bullet) {
   star.remove();
   createStar()
   score += 1
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 15; i++) {
     let p = createSprite(bullet.position.x, bullet.position.y);
     if (i % 2 === 0) {
       p.addImage(particleImage);
@@ -249,6 +261,6 @@ function starHit(star, bullet) {
     }
     p.setSpeed(random(3, 5), random(0, 360));
     p.friction = .10;
-    p.life = 15;
+    p.life = 18;
   }
 }
