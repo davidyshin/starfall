@@ -1,4 +1,4 @@
-let base, ship, ship_image, bullets, stars, hp_bar
+let base, ship, ship_image, star_image, bullets, stars, hp_bar
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
@@ -11,6 +11,7 @@ let hp = 100
 function preload() {
 
   ship_image = loadImage("assets/ship.png");
+  star_image = loadImage("assets/star.png");
 
 }
 
@@ -173,6 +174,7 @@ function createStar() {
   star.addSpeed(grav, 90)
   star.rotationSpeed = 10
   stars.add(star)
+  star.addImage(star_image)
 }
 
 
