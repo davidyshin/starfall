@@ -1,8 +1,9 @@
-#p5-Skyfall
-Work in progress game
+## Skyfall
+
+Work-in-progress game made with p5
 
 ## Controls
-"z" to move Left <--
-"x" to move Right >--
-"c" to shoot
-# starfall
+
+- Left and Right Arrows to move
+- Z to shoot
+- P to pause
