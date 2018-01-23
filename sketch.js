@@ -1,4 +1,4 @@
-let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, star_image, particleImage, particleImage2, particleImage3, explosion
+let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosion
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
@@ -16,7 +16,8 @@ function preload() {
   particleImage = loadImage("assets/particle.png");
   particleImage2 = loadImage("assets/particle2.png");
   particleImage3 = loadImage("assets/particle3.png");
-  explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
+  bg_image = loadImage("assets/background.png")
+  // explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
 }
 
 
@@ -29,7 +30,7 @@ function setup() {
   ship.addImage(ship_image)
   base = createSprite(width / 2, height * .985, 800, 20)
   hp_bar = createSprite(width / 2, height * .013, width, 20)
-  base.shapeColor = color(0, 174, 255)
+  base.shapeColor = color(0)
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   // creating 25 stars
@@ -59,7 +60,7 @@ function draw() {
     // if gameover is false/gamestarted is true
     // game renders normally
     clear()
-    background(0)
+    background(bg_image)
     textAlign(CENTER);
     fill(255, 255, 255)
     // Game display texts
