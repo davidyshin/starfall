@@ -1,4 +1,4 @@
-let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosion;
+let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosions;
 let gameStarted = false;
 let gameOver = false;
 let paused = false;
@@ -20,13 +20,14 @@ function preload() {
   particleImage2 = loadImage("assets/particle2.png");
   particleImage3 = loadImage("assets/particle3.png");
   bg_image = loadImage("assets/background.png");
-  // explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
+  explosion = loadAnimation("assets/explode/explosion_00.png", "assets/explode/explosion_35.png");
 }
 
 
 function setup() {
   stars = new Group();
   bullets = new Group();
+  explosions = new Group();
   hearts = new Group();
   createCanvas(800, 600);
   frameRate(40);
@@ -125,8 +126,9 @@ P : Pause`, width / 2, 65);
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text('GAME OVER', width / 2, height / 2)
-    text('Press "R" to play again.', width / 2, height / 2 + 50);
+    text('GAME OVER', width / 2, height / 2 - 100)
+    text('Press "R" to play again.', width / 2, height / 2 - 50);
+
     stars.forEach(s => {
       s.remove();
     })
@@ -134,6 +136,9 @@ P : Pause`, width / 2, 65);
   // if gamesover and "p" is clicked, game is reset
   // hp 100, score 0, 25 more stars
   if (keyWentDown("r") && gameOver) {
+    explosions.forEach(s => {
+      s.remove();
+    })
     hp = 100
     score = 0
     level = 1
@@ -245,9 +250,21 @@ function baseHit(star) {
   } else {
     hp = 0
     hp_bar.width = 0
+    let star = createSprite((random(50, 750)), -100, 50, 50);
+    star.addSpeed(99, 90)
+    star.rotationSpeed = 2.5
+    stars.add(star)
+    star.addImage(star_image)
+
+    if (explosions.length < 2) {
+      let g = createSprite(width / 2, height / 2, 50, 50)
+      g.addAnimation("explosion", explosion)
+      g.life = 50
+      explosions.add(g)
+    }
     setTimeout(() => {
       gameOver = true
-    }, 300)
+    }, 2000)
   }
   // e.life = 50
   // e.addAnimation("explode", explosion)
