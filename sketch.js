@@ -114,7 +114,7 @@ P : Pause`, width / 2, 65);
 
     // if any stars "ovelap" any bullets, invokes starHit
     /// function which removes star (line 228)
-    stars.overlap(bullets, starHit);
+    bullets.overlap(stars, starHit);
     // if any stars "overlap" or "hit" base, invokes baseHit function
     // which minuses 10hp
     stars.overlap(base, baseHit)
@@ -269,8 +269,9 @@ function baseHit(star) {
 }
 
 function starHit(star, bullet) {
+  console.log("hit")
   star.remove();
-  score += 1
+
   for (let i = 0; i < 15; i++) {
     let p = createSprite(bullet.position.x, bullet.position.y);
     if (i % 2 === 0) {
@@ -282,6 +283,7 @@ function starHit(star, bullet) {
     p.life = 18;
     p.friction = .10
   }
+  score += 1
   bullet.remove();
 }
 
