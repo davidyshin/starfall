@@ -8,12 +8,20 @@ let grav = 2
 let hp = 100
 
 
+function preload() {
+
+  ship_image = loadImage("assets/ship.png");
+
+}
+
+
 function setup() {
   stars = new Group();
   bullets = new Group();
   createCanvas(800, 600);
   frameRate(40);
   ship = createSprite(width / 2, height * .95, 20, 20)
+  ship.addImage(ship_image)
   base = createSprite(width / 2, height * .985, 800, 20)
   hp_bar = createSprite(width / 2, height * .013, width, 20)
   base.shapeColor = color(0, 174, 255)
@@ -80,7 +88,7 @@ function draw() {
     if (keyWentDown("z")) {
       let bullet = createSprite(ship.position.x, 525, 3, 10);
       bullet.setSpeed(10, ship.rotation - 90);
-      bullet.life = 100;
+      bullet.life = 50;
       bullets.add(bullet)
     }
 
@@ -163,7 +171,7 @@ function createStar() {
   let star = createSprite((random(50, 750)),
     (random(-100, -3000)), 30, 30);
   star.addSpeed(grav, 90)
-  star.rotationSpeed = 15
+  star.rotationSpeed = 10
   stars.add(star)
 }
 
