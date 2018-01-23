@@ -1,24 +1,25 @@
-let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosion
-let gameStarted = false
-let gameOver = false
+let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosion;
+let gameStarted = false;
+let gameOver = false;
 let paused = false;
 
-let hiscore = 0
-let score = 0
-let level = 1
-let grav = 2
-let hp = 100
+let hiscore = 0;
+let score = 0;
+let level = 1;
+let grav = 2;
+let hp = 100;
 let button;
 
 function preload() {
   // preloading images to use for stars and ship
   ship_image = loadImage("assets/ship.png");
   star_image = loadImage("assets/star.png");
-  bullet_image = loadImage("assets/bullet.png")
+  heart_image = loadImage("assets/heart.png");
+  bullet_image = loadImage("assets/bullet.png");
   particleImage = loadImage("assets/particle.png");
   particleImage2 = loadImage("assets/particle2.png");
   particleImage3 = loadImage("assets/particle3.png");
-  bg_image = loadImage("assets/background.png")
+  bg_image = loadImage("assets/background.png");
   // explosion = loadAnimation("assets/explosion/explosion_1.png", "assets/explosion/explosion_15.png");
 }
 
@@ -26,6 +27,7 @@ function preload() {
 function setup() {
   stars = new Group();
   bullets = new Group();
+  hearts = new Group();
   createCanvas(800, 600);
   frameRate(40);
   ship = createSprite(width / 2, height * .93, 20, 20)
@@ -58,12 +60,13 @@ function draw() {
     }
   }
   if (!gameOver && gameStarted) {
+    // if gameover is false/gamestarted is true
+    // game renders normally
     while (stars.length <= 25) {
       createStar()
     }
-    // if gameover is false/gamestarted is true
-    // game renders normally
     clear()
+    hp_bar.width = hp * 8
     background(bg_image)
     textAlign(CENTER);
     fill(255, 255, 255)
@@ -105,7 +108,7 @@ P : Pause`, width / 2, 65);
       let bullet = createSprite(ship.position.x, ship.position.y * .985, 8, 18);
       bullet.addImage(bullet_image)
       bullet.setSpeed(10, 270);
-      bullet.life = 55;
+      bullet.life = 52;
       bullets.add(bullet)
     }
 
@@ -135,20 +138,16 @@ P : Pause`, width / 2, 65);
     score = 0
     level = 1
     grav = 2
-    hp_bar.width = width
+    hp_bar.width = hp * 8
     hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
-    // stars = new Group();
-    if (stars.length < 30) {
-      createStar()
-    }
     gameOver = false
   }
   // Levels 1-15 determined by score
   switch (score) {
     case 20:
       level = 2;
-      grav = 3;
+      grav = 2.5;
       break;
     case 60:
       level = 3;
@@ -221,7 +220,16 @@ function createStar() {
   star.addImage(star_image)
 }
 
-
+// creates heart in y position -200,
+// starts fall with consistent gravity ( pretty quick )
+// will be used in the future as a power up (replenish life)
+function createHeart() {
+  let heart = createSprite(random(50, 750), -200, 20, 20);
+  heart.addImage(heart_image)
+  heart.setSpeed(10, 90);
+  heart.life = 100;
+  hearts.add(heart)
+}
 
 
 // if the base platform is hit hp is minused 10
@@ -229,7 +237,6 @@ function createStar() {
 function baseHit(star) {
   if (hp > 10) {
     hp -= 10
-    hp_bar.width -= 80
     if (hp <= 50 && hp >= 30) {
       hp_bar.shapeColor = color(255, 156, 0)
     } else if (hp <= 30 && hp >= 10) {
