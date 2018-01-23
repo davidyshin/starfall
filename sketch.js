@@ -1,4 +1,4 @@
-let base, ship, ship_image, star_image, bullets, stars, hp_bar
+let base, ship, bullets, stars, hp_bar, ship_image, star_image, particleImage
 let gameStarted = false
 let gameOver = false
 let hiscore = 0
@@ -12,7 +12,8 @@ function preload() {
   // preloading images to use for stars and ship
   ship_image = loadImage("assets/ship.png");
   star_image = loadImage("assets/star.png");
-
+  particleImage = loadImage("assets/particle.png");
+  particleImage2 = loadImage("assets/particle2.png");
 }
 
 
@@ -110,8 +111,11 @@ Z : Shoot `, width / 2, 65);
       bullets.add(bullet)
     }
 
-
+    // if any stars "ovelap" any bullets, invokes starHit
+    /// function which removes star (line 228)
     stars.overlap(bullets, starHit);
+    // if any stars "overlap" or "hit" base, invokes baseHit function
+    // which minuses 10hp
     stars.overlap(base, baseHit)
 
     drawSprites();
@@ -230,4 +234,15 @@ function starHit(star, bullet) {
   star.remove();
   createStar()
   score += 1
+  for (var i = 0; i < 10; i++) {
+    var p = createSprite(bullet.position.x, bullet.position.y);
+    if (i % 2 === 0) {
+      p.addImage(particleImage);
+    } else {
+      p.addImage(particleImage2)
+    }
+    p.setSpeed(random(3, 5), random(0, 360));
+    p.friction = .10;
+    p.life = 15;
+  }
 }
