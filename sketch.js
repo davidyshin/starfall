@@ -9,7 +9,7 @@ let hp = 100
 
 
 function preload() {
-
+  // preloading images to use for stars and ship
   ship_image = loadImage("assets/ship.png");
   star_image = loadImage("assets/star.png");
 
@@ -28,6 +28,7 @@ function setup() {
   base.shapeColor = color(0, 174, 255)
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
+  // creating 25 stars
   for (let i = 0; i < 25; i++) {
     createStar()
   }
@@ -37,7 +38,7 @@ function setup() {
 
 
 function draw() {
-
+  // before game starts, requires a space click or mouse left click"
   if (!gameStarted) {
     textSize(30)
     clear()
@@ -51,15 +52,18 @@ function draw() {
     }
   }
   if (!gameOver && gameStarted) {
+    // if gameover is false/gamestarted is true
+    // game renders normally
     clear()
     background(0)
     textAlign(CENTER);
     fill(255, 255, 255)
+    // Game display texts
     let title_text = text("Starfall", width / 2, 35)
     let hp_text = text(`BASE HP: ${hp}`, width / 2, 50)
     let score_text = text(`Score: ${score}`, 700, 35);
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
-    let level_text = text(`LEVEL: ${level}`, 50, 35)
+    let level_text = text(`Level: ${level}`, 50, 35)
     let control_text = text("<- : Left | -> : Right | Z: Shoot", width / 2, 65);
 
     //draw all the sprites added to the sketch so far
@@ -99,6 +103,7 @@ function draw() {
 
     drawSprites();
   } else if (gameOver) {
+    // when gameover (hp reaches 0) is true below will render
     textSize(30)
     textAlign(CENTER)
     fill(255, 255, 255)
@@ -108,13 +113,15 @@ function draw() {
       s.remove();
     })
   }
+  // if gamesover and "p" is clicked, game is reset
+  // hp 100, score 0, 25 more stars
   if (keyWentDown("p") && gameOver) {
     hp = 100
     score = 0
     hp_bar.width = width
     hp_bar.shapeColor = color(0, 253, 47)
     // stars = new Group();
-    while (stars.length < 20) {
+    while (stars.length < 25) {
       createStar();
     }
     gameOver = false
@@ -162,17 +169,20 @@ function draw() {
       grav = 13;
       break;
   }
+  // if score which starts at 0 is higher than current hiscore, redeclares hiscore
   if (score > hiscore) {
     hiscore = score
   }
 }
-// creates star in y position -100 between x positions 50-750
+// creates star in y position -100 (-100 is above the canvas, so it prerenders
+// and falls into the canvas) between x positions 50-750
 // stars fall with speed according to gravity
+
 function createStar() {
   let star = createSprite((random(50, 750)),
     (random(-100, -3000)), 30, 30);
   star.addSpeed(grav, 90)
-  star.rotationSpeed = 10
+  star.rotationSpeed = 3
   stars.add(star)
   star.addImage(star_image)
 }
