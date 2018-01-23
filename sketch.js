@@ -2,7 +2,7 @@ let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star
 let gameStarted = false;
 let gameOver = false;
 let paused = false;
-
+let exploded = false;
 let hiscore = 0;
 let score = 0;
 let level = 1;
@@ -120,15 +120,24 @@ P : Pause`, width / 2, 65);
     // which minuses 10hp
     stars.overlap(base, baseHit)
 
-    drawSprites();
   } else if (gameOver) {
+    clear()
     // when gameover (hp reaches 0) is true below will render
     textSize(30)
+    background(bg_image)
     textAlign(CENTER)
     fill(255, 255, 255)
     text('GAME OVER', width / 2, height / 2 - 100)
     text('Press "R" to play again.', width / 2, height / 2 - 50);
-
+    if (!exploded) {
+      let g = createSprite(width / 2, height / 2, 50, 50)
+      g.addAnimation("explosion", explosion)
+      explosions.add(g)
+      setTimeout(() => {
+        g.remove()
+      }, 3000)
+      exploded = true;
+    }
     stars.forEach(s => {
       s.remove();
     })
@@ -139,6 +148,7 @@ P : Pause`, width / 2, 65);
     explosions.forEach(s => {
       s.remove();
     })
+    clear()
     hp = 100
     score = 0
     level = 1
@@ -147,7 +157,9 @@ P : Pause`, width / 2, 65);
     hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
     gameOver = false
+    exploded = false
   }
+  drawSprites();
   // Levels 1-15 determined by score
   switch (score) {
     case 20:
@@ -255,16 +267,9 @@ function baseHit(star) {
     star.rotationSpeed = 2.5
     stars.add(star)
     star.addImage(star_image)
-
-    if (explosions.length < 2) {
-      let g = createSprite(width / 2, height / 2, 50, 50)
-      g.addAnimation("explosion", explosion)
-      g.life = 50
-      explosions.add(g)
-    }
-    setTimeout(() => {
-      gameOver = true
-    }, 2000)
+  }
+  if (hp < 10) {
+    gameOver = true;
   }
   // e.life = 50
   // e.addAnimation("explode", explosion)
