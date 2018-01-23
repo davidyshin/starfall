@@ -69,27 +69,28 @@ Z : Shoot `, width / 2, 65);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
+    if (ship.position.x < 50 || ship.position.x > 750) {
+      ship.setSpeed(0, 0);
+    }
     if (keyDown("left")) {
-      if (ship.position.x > 50) {
+      if (ship.position.x > 60) {
         ship.setSpeed(25, 180);
-      } else {
-        ship.setSpeed(0, 180)
       }
     }
+
     if (keyWentUp("left")) {
-      ship.setSpeed(0, 0)
+      ship.setSpeed(1.5, 180);
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
-      if (ship.position.x < 750) {
+      if (ship.position.x < 740) {
         ship.setSpeed(25, 0);
-      } else {
-        ship.setSpeed(0, 0)
       }
     }
     if (keyWentUp("right")) {
-      ship.setSpeed(0, 0);
+      ship.setSpeed(1.5, 0);
     }
+
     //if mouse is to the left
     // if (mouseX < ship.position.x - 20) {
     //   //flip horizontally
