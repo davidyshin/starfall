@@ -71,24 +71,24 @@ Z : Shoot `, width / 2, 65);
     //the positions will be updated automatically at every cycle
     if (keyDown("left")) {
       if (ship.position.x > 50) {
-        ship.setSpeed(30, 180);
+        ship.setSpeed(25, 180);
       } else {
         ship.setSpeed(0, 180)
       }
     }
     if (keyWentUp("left")) {
-      ship.setSpeed(1.5, 180);
+      ship.setSpeed(0, 0)
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
       if (ship.position.x < 750) {
-        ship.setSpeed(30, 0);
+        ship.setSpeed(25, 0);
       } else {
         ship.setSpeed(0, 0)
       }
     }
     if (keyWentUp("right")) {
-      ship.setSpeed(1.5, 0);
+      ship.setSpeed(0, 0);
     }
     //if mouse is to the left
     // if (mouseX < ship.position.x - 20) {
@@ -132,6 +132,7 @@ Z : Shoot `, width / 2, 65);
     score = 0
     hp_bar.width = width
     hp_bar.shapeColor = color(0, 253, 47)
+    ship.position.x = width / 2
     // stars = new Group();
     while (stars.length < 25) {
       createStar();
