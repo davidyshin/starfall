@@ -150,57 +150,57 @@ P : Pause`, width / 2, 65);
       level = 2;
       grav = 3;
       break;
-    case 40:
+    case 60:
       level = 3;
       grav = 4;
       break;
-    case 60:
+    case 120:
       level = 4;
-      grav = 5;
-      break;
-    case 80:
-      level = 5;
       grav = 5.5;
       break;
-    case 100:
-      level = 6;
+    case 300:
+      level = 5;
       grav = 6;
       break;
-    case 140:
-      level = 7;
+    case 420:
+      level = 6;
       grav = 6.5;
       break;
-    case 180:
-      level = 8;
+    case 560:
+      level = 7;
       grav = 7;
       break;
-    case 200:
-      level = 9;
+    case 800:
+      level = 8;
       grav = 7.5;
       break;
-    case 220:
-      level = 10;
+    case 1000:
+      level = 9;
       grav = 8;
       break;
-    case 240:
-      level = 11;
+    case 1300:
+      level = 10;
       grav = 8.5;
       break;
-    case 260:
-      level = 12;
+    case 1600:
+      level = 11;
       grav = 9;
       break;
-    case 280:
-      level = 13;
+    case 1900:
+      level = 12;
       grav = 9.5;
       break;
-    case 300:
-      level = 14;
+    case 2200:
+      level = 13;
       grav = 10;
       break;
-    case 320:
-      level = 15;
+    case 2800:
+      level = 14;
       grav = 10.5;
+      break;
+    case 3300:
+      level = 15;
+      grav = 11;
       break;
   }
   // if score which starts at 0 is higher than current hiscore, redeclares hiscore
