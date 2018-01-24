@@ -13,15 +13,15 @@ let font
 
 function preload() {
   // preloading images to use for stars and ship
-  font = loadFont("assets/2p.ttf")
-  ship_image = loadImage("assets/ship.png");
-  star_image = loadImage("assets/star.png");
-  heart_image = loadImage("assets/heart.png");
-  bullet_image = loadImage("assets/bullet.png");
-  particleImage = loadImage("assets/particle.png");
-  particleImage2 = loadImage("assets/particle2.png");
-  particleImage3 = loadImage("assets/particle3.png");
-  bg_image = loadImage("assets/background.png");
+  font = loadFont("assets/fonts/2p.ttf")
+  ship_image = loadImage("assets/images/ship.png");
+  star_image = loadImage("assets/images/star.png");
+  heart_image = loadImage("assets/images/heart.png");
+  bullet_image = loadImage("assets/images/bullet.png");
+  particleImage = loadImage("assets/images/particle.png");
+  particleImage2 = loadImage("assets/images/particle2.png");
+  particleImage3 = loadImage("assets/images/particle3.png");
+  bg_image = loadImage("assets/images/background.png");
   explosion = loadAnimation("assets/explode/explosion_00.png", "assets/explode/explosion_35.png");
 
 }
