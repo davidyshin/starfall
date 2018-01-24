@@ -344,6 +344,7 @@ function baseHit(star) {
 
 function specialHit(special, star) {
   star.remove();
+  score += 1
 
   for (let i = 0; i < 15; i++) {
     let p = createSprite(star.position.x, star.position.y);
@@ -356,7 +357,6 @@ function specialHit(special, star) {
     p.life = 18;
     p.friction = .10
   }
-  score += 1
 }
 
 function starHit(star, bullet) {
