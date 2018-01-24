@@ -1,6 +1,6 @@
 ## Star-fall
 
-A work-in-progress game made with p5.js
+A work-in-progress game made with the p5.js and the p5.play libraries.
 
 ## Preview
 
@@ -16,7 +16,7 @@ A work-in-progress game made with p5.js
 ## Built using:
 
 * JavaScript(ES2016)
-* P5.js Library
+* p5.js Library
 * HTML5
 
 ## Author
