@@ -1,4 +1,4 @@
-## Star-fall
+## Star-Fall
 **Star-Fall** is a fast-paced star shooter written in JavaScript and inspired by the 80's arcade game Galaga*. The aim is to score as many points as possible by destroy an ever-increasing wave of stars before they hit the city.
 
 ## Technologies
