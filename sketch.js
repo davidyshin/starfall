@@ -1,4 +1,5 @@
 let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosions;
+let hearts;
 let gameStarted = false;
 let gameOver = false;
 let paused = false;
@@ -8,8 +9,7 @@ let score = 0;
 let level = 1;
 let grav = 2;
 let hp = 100;
-let button;
-let font
+let font;
 
 function preload() {
   // preloading images to use for stars and ship
@@ -127,6 +127,7 @@ P : Pause`, width / 2, 80);
     // if any stars "overlap" or "hit" base, invokes baseHit function
     // which minuses 10hp
     stars.overlap(base, baseHit)
+    hearts.overlap(ship, heartHit)
 
   } else if (gameOver) {
     clear()
@@ -159,11 +160,11 @@ P : Pause`, width / 2, 80);
     })
     clear()
     hp = 100
+    hp_bar.width = hp * 8
+    hp_bar.shapeColor = color(0, 253, 47)
     score = 0
     level = 1
     grav = 2
-    hp_bar.width = hp * 8
-    hp_bar.shapeColor = color(0, 253, 47)
     ship.position.x = width / 2
     gameOver = false
     exploded = false
@@ -174,34 +175,42 @@ P : Pause`, width / 2, 80);
     case 20:
       level = 2;
       grav = 2.5;
+      setTimeout(createHeart, 300)
       break;
     case 60:
       level = 3;
       grav = 4;
+      setTimeout(createHeart, 300)
       break;
     case 120:
       level = 4;
       grav = 5.5;
+      setTimeout(createHeart, 300)
       break;
     case 300:
       level = 5;
       grav = 6;
+      setTimeout(createHeart, 300)
       break;
     case 420:
       level = 6;
       grav = 6.5;
+      setTimeout(createHeart, 300)
       break;
     case 560:
       level = 7;
       grav = 7;
+      setTimeout(createHeart, 300)
       break;
     case 800:
       level = 8;
       grav = 7.5;
+      setTimeout(createHeart, 300)
       break;
     case 1000:
       level = 9;
       grav = 8;
+      setTimeout(createHeart, 300)
       break;
     case 1300:
       level = 10;
@@ -250,13 +259,23 @@ function createStar() {
 // starts fall with consistent gravity ( pretty quick )
 // will be used in the future as a power up (replenish life)
 function createHeart() {
-  let heart = createSprite(random(50, 750), -200, 20, 20);
-  heart.addImage(heart_image)
-  heart.setSpeed(10, 90);
-  heart.life = 100;
-  hearts.add(heart)
+  if (hearts.length < 1) {
+    let heart = createSprite(random(50, 750), -200, 20, 20);
+    heart.addImage(heart_image)
+    heart.setSpeed(10, 90);
+    heart.life = 90;
+    hearts.add(heart)
+    score += 1
+  }
 }
 
+// function to be invoked when ship and upgrade collides
+function heartHit(heart) {
+  hp = 100
+  hp_bar.width = hp * 8
+  hp_bar.shapeColor = color(0, 253, 47)
+  heart.remove()
+}
 
 // if the base platform is hit hp is minused 10
 // hp_bar sprite (rectangle with width of 800) loses 80 width (10% of 800)
