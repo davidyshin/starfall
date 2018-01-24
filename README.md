@@ -1,6 +1,8 @@
 ## Star-fall
 
 A work-in-progress game made with the p5.js and the p5.play libraries.
+## Live
+[live](davidsh.in/star-fall)
 
 ## Preview
 
