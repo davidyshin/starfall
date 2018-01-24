@@ -9,9 +9,11 @@ let level = 1;
 let grav = 2;
 let hp = 100;
 let button;
+let font
 
 function preload() {
   // preloading images to use for stars and ship
+  font = loadFont("assets/2p.ttf")
   ship_image = loadImage("assets/ship.png");
   star_image = loadImage("assets/star.png");
   heart_image = loadImage("assets/heart.png");
@@ -21,10 +23,12 @@ function preload() {
   particleImage3 = loadImage("assets/particle3.png");
   bg_image = loadImage("assets/background.png");
   explosion = loadAnimation("assets/explode/explosion_00.png", "assets/explode/explosion_35.png");
+
 }
 
 
 function setup() {
+  textFont(font)
   stars = new Group();
   bullets = new Group();
   explosions = new Group();
@@ -48,14 +52,15 @@ function setup() {
 function draw() {
   // before game starts, requires a space click or mouse left click"
   if (!gameStarted) {
-    textSize(30)
     clear()
     background(0)
     textAlign(CENTER)
     fill(255, 255, 255)
-    text(`Welcome to Starfall.`, width / 2, height / 2)
-    text("Protect your city from the falling stars.", width / 2, height / 1.7)
-    text(`Press "Space" or Click to start.`, width / 2, height / 1.5);
+    textSize(20)
+    text(`Welcome to Starfall.`, width / 2, height / 2.5)
+    text(`Protect your city
+from the falling stars.`, width / 2, height / 2.1)
+    text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
       gameStarted = true
     }
@@ -72,14 +77,17 @@ function draw() {
     textAlign(CENTER);
     fill(255, 255, 255)
     // Game display texts
-    let title_text = text("Starfall", width / 2, 35)
-    let hp_text = text(`BASE HP: ${hp}`, width / 2, 50)
-    let score_text = text(`Score: ${score}`, 700, 35);
-    let hiscore_text = text(`Hi-Score: ${hiscore}`, 700, 50)
-    let level_text = text(`Level: ${level}`, 50, 35)
+    textSize(15)
+    textStyle("BOLD")
+    let title_text = text("Starfall", width / 2, 45)
+    textSize(10)
+    let hp_text = text(`BASE HP: ${hp}`, width / 2, 65)
+    let score_text = text(`Score: ${score}`, 730, 55);
+    let hiscore_text = text(`Hi-Score: ${hiscore}`, 730, 70)
+    let level_text = text(`Level: ${level}`, 70, 55)
     let control_text = text(`← Move Left | Move Right →
 Z : Shoot
-P : Pause`, width / 2, 65);
+P : Pause`, width / 2, 80);
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
