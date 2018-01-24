@@ -215,26 +215,32 @@ P : Pause`, width / 2, 80);
     case 1300:
       level = 10;
       grav = 8.5;
+      setTimeout(createHeart, 300)
       break;
     case 1600:
       level = 11;
       grav = 9;
+      setTimeout(createHeart, 300)
       break;
     case 1900:
       level = 12;
       grav = 9.5;
+      setTimeout(createHeart, 300)
       break;
     case 2200:
       level = 13;
       grav = 10;
+      setTimeout(createHeart, 300)
       break;
     case 2800:
       level = 14;
       grav = 10.5;
+      setTimeout(createHeart, 300)
       break;
     case 3300:
       level = 15;
       grav = 11;
+      setTimeout(createHeart, 300)
       break;
   }
   // if score which starts at 0 is higher than current hiscore, redeclares hiscore
