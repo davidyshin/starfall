@@ -1,4 +1,4 @@
-let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, star_image, particleImage, particleImage2, particleImage3, explosions;
+let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, start_bg, star_image, particleImage, particleImage2, particleImage3, explosions;
 let hearts;
 let gameStarted = false;
 let gameOver = false;
@@ -23,7 +23,7 @@ function preload() {
   particleImage3 = loadImage("assets/images/particle3.png");
   bg_image = loadImage("assets/images/background.png");
   explosion = loadAnimation("assets/explode/explosion_00.png", "assets/explode/explosion_35.png");
-
+  start_bg = loadImage("assets/images/startbg.png")
 }
 
 
@@ -53,7 +53,7 @@ function draw() {
   // before game starts, requires a space click or mouse left click"
   if (!gameStarted) {
     clear()
-    background(0)
+    background(start_bg)
     textAlign(CENTER)
     fill(255, 255, 255)
     textSize(20)
