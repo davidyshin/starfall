@@ -4,6 +4,7 @@ let gameStarted = false;
 let gameOver = false;
 let paused = false;
 let exploded = false;
+let specialUsed = false;
 let hiscore = 0;
 let score = 0;
 let level = 1;
@@ -12,7 +13,7 @@ let hp = 100;
 let font;
 
 function preload() {
-  // preloading images to use for stars and ship
+  // preloading images to use for stars, ship, bullet, animations
   font = loadFont("assets/fonts/2p.ttf")
   ship_image = loadImage("assets/images/ship.png");
   star_image = loadImage("assets/images/star.png");
@@ -33,6 +34,7 @@ function setup() {
   bullets = new Group();
   explosions = new Group();
   hearts = new Group();
+  specials = new Group();
   createCanvas(800, 600);
   frameRate(40);
   ship = createSprite(width / 2, height * .93, 20, 20)
@@ -43,7 +45,6 @@ function setup() {
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   // creating 25 stars
-
 }
 
 
@@ -87,7 +88,10 @@ from the falling stars.`, width / 2, height / 2.1)
     let level_text = text(`Level: ${level}`, 70, 55)
     let control_text = text(`← Move Left | Move Right →
 Z : Shoot
-P : Pause`, width / 2, 80);
+  X : Special
+P : Pause
+`, width / 2, 80);
+    let special_text = text(`Special: ${specialUsed ? "No" : "Yes"}`, 70, 70)
 
     //draw all the sprites added to the sketch so far
     //the positions will be updated automatically at every cycle
@@ -121,6 +125,23 @@ P : Pause`, width / 2, 80);
       bullets.add(bullet)
     }
 
+    if (keyWentDown("x")) {
+      console.log("special")
+      if (!specialUsed) {
+        let special = createSprite(width / 2, ship.position.y, 800, 1.5)
+        special.addSpeed(9, 270)
+        special.life = 70
+        specials.add(special)
+      }
+      setTimeout(() => {
+        specialUsed = true;
+      }, 400)
+
+      setTimeout(() => {
+          specialUsed = false;
+        },
+        30000)
+    }
     // if any stars "ovelap" any bullets, invokes starHit
     /// function which removes star (line 228)
     bullets.overlap(stars, starHit);
@@ -128,6 +149,8 @@ P : Pause`, width / 2, 80);
     // which minuses 10hp
     stars.overlap(base, baseHit)
     hearts.overlap(ship, heartHit)
+    specials.overlap(stars, specialHit)
+
 
   } else if (gameOver) {
     clear()
@@ -319,11 +342,28 @@ function baseHit(star) {
   star.remove()
 }
 
+function specialHit(special, star) {
+  star.remove();
+
+  for (let i = 0; i < 15; i++) {
+    let p = createSprite(star.position.x, star.position.y);
+    if (i % 2 === 0) {
+      p.addImage(particleImage);
+    } else {
+      p.addImage(particleImage2)
+    }
+    p.setSpeed(random(3, 5), random(0, 360));
+    p.life = 18;
+    p.friction = .10
+  }
+  score += 1
+}
+
 function starHit(star, bullet) {
   star.remove();
 
   for (let i = 0; i < 15; i++) {
-    let p = createSprite(bullet.position.x, bullet.position.y);
+    let p = createSprite(star.position.x, star.position.y);
     if (i % 2 === 0) {
       p.addImage(particleImage);
     } else {
