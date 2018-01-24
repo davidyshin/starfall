@@ -2,7 +2,7 @@
 
 A work-in-progress game made with the p5.js and the p5.play libraries.
 ## Live
-[Click here for the Live version](davidsh.in/star-fall)
+[Click here for the Live version](http://davidsh.in/star-fall)
 
 ## Preview
 
