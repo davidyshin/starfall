@@ -23,9 +23,9 @@ Star-Fall is built using ES6 syntax JavaScript and the p5.js libraries. p5.js is
 * M : Mute sound
 
 ## Future Features
-* Power-ups
+* Better graphics
+* More Power-ups
 * Bosses
-* Sound Effects
 
 ## Author
 
