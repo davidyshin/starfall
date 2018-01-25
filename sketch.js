@@ -17,6 +17,8 @@ let base,
   start_sound,
   special_sound,
   bgm,
+  gameoverbgm,
+  startmenu_sound,
   explosions;
 let hearts;
 let gameStarted = false;
@@ -54,6 +56,8 @@ function preload() {
   life_sound = loadSound('assets/sounds/life.wav')
   special_sound = loadSound('assets/sounds/special.wav')
   pause_sound = loadSound('assets/sounds/pause.wav')
+  gameoverbgm = loadSound('assets/sounds/gameoverbgm.ogg')
+  startmenu_sound = loadSound('assets/sounds/startmenu.wav')
   bgm = loadSound('assets/sounds/bgm.ogg')
 }
 
@@ -75,6 +79,7 @@ function setup() {
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   masterVolume(1)
+  startmenu_sound.loop()
   // bgm.play()
   // creating 25 stars
 }
@@ -96,6 +101,7 @@ from the falling stars.`, width / 2, height / 2.1)
     text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
       start_sound.play()
+      startmenu_sound.stop()
       bgm.loop()
       gameStarted = true
     }
@@ -121,6 +127,7 @@ from the falling stars.`, width / 2, height / 2.1)
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 730, 70)
     let level_text = text(`Level: ${level}`, 70, 55)
     let control_text = text(`← Move Left | Move Right →
+
 Z : Shoot
   X : Special
 P : Pause
@@ -215,6 +222,8 @@ P : Pause
   // if gamesover and "p" is clicked, game is reset
   // hp 100, score 0, 25 more stars
   if (keyWentDown("r") && gameOver) {
+    gameoverbgm.stop()
+    bgm.loop()
     explosions.forEach(s => {
       s.remove();
     })
@@ -361,7 +370,10 @@ function baseHit(star) {
   basehit_sound.play()
   if (hp < 10) {
     gameover_sound.play()
+
     gameOver = true;
+    bgm.stop()
+    gameoverbgm.loop()
   }
   // e.life = 50
   // e.addAnimation("explode", explosion)
