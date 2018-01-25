@@ -1,10 +1,30 @@
-let base, ship, bullets, stars, hp_bar, ship_image, bullet_image, bg_image, start_bg, star_image, particleImage, particleImage2, particleImage3, explosions;
+let base,
+  ship,
+  bullets,
+  stars,
+  hp_bar,
+  ship_image,
+  bullet_image,
+  bg_image,
+  start_bg,
+  star_image,
+  particleImage,
+  particleImage2,
+  particleImage3,
+  bullet_sound,
+  star_sound,
+  basehit_sound,
+  start_sound,
+  special_sound,
+  bgm,
+  explosions;
 let hearts;
 let gameStarted = false;
 let gameOver = false;
 let paused = false;
 let exploded = false;
 let specialUsed = false;
+let muted = false;
 let hiscore = 0;
 let score = 0;
 let level = 1;
@@ -25,6 +45,15 @@ function preload() {
   bg_image = loadImage("assets/images/background.png");
   explosion = loadAnimation("assets/explode/explosion_00.png", "assets/explode/explosion_35.png");
   start_bg = loadImage("assets/images/startbg.png")
+  soundFormats("wav", "ogg");
+  start_sound = loadSound('assets/sounds/start.wav')
+  gameover_sound = loadSound('assets/sounds/gameover.wav')
+  bullet_sound = loadSound('assets/sounds/laser.wav')
+  starhit_sound = loadSound('assets/sounds/starhit.wav')
+  basehit_sound = loadSound('assets/sounds/basehit.wav')
+  life_sound = loadSound('assets/sounds/life.wav')
+  special_sound = loadSound('assets/sounds/special.wav')
+  bgm = loadSound('assets/sounds/bgm.ogg')
 }
 
 
@@ -44,6 +73,7 @@ function setup() {
   base.shapeColor = color(0)
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
+  // bgm.play()
   // creating 25 stars
 }
 
@@ -63,6 +93,8 @@ function draw() {
 from the falling stars.`, width / 2, height / 2.1)
     text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
+      start_sound.play()
+      bgm.loop()
       gameStarted = true
     }
   }
@@ -123,6 +155,7 @@ P : Pause
       bullet.setSpeed(10, 270);
       bullet.life = 52;
       bullets.add(bullet)
+      bullet_sound.play()
     }
 
     if (keyWentDown("x")) {
@@ -132,6 +165,7 @@ P : Pause
         special.addSpeed(9, 270)
         special.life = 70
         specials.add(special)
+        special_sound.play()
       }
       setTimeout(() => {
         specialUsed = true;
@@ -303,6 +337,7 @@ function heartHit(heart) {
   hp = 100
   hp_bar.width = hp * 8
   hp_bar.shapeColor = color(0, 253, 47)
+  life_sound.play()
   heart.remove()
 }
 
@@ -320,7 +355,9 @@ function baseHit(star) {
     hp = 0
     hp_bar.width = 0
   }
+  basehit_sound.play()
   if (hp < 10) {
+    gameover_sound.play()
     gameOver = true;
   }
   // e.life = 50
@@ -342,10 +379,11 @@ function baseHit(star) {
   star.remove()
 }
 
+
 function specialHit(special, star) {
   star.remove();
   score += 1
-
+  starhit_sound.play()
   for (let i = 0; i < 15; i++) {
     let p = createSprite(star.position.x, star.position.y);
     if (i % 2 === 0) {
@@ -361,7 +399,7 @@ function specialHit(special, star) {
 
 function starHit(star, bullet) {
   star.remove();
-
+  starhit_sound.play()
   for (let i = 0; i < 15; i++) {
     let p = createSprite(star.position.x, star.position.y);
     if (i % 2 === 0) {
