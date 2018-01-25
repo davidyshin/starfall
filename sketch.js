@@ -134,13 +134,9 @@ from the falling stars.`, width / 2, height / 2.1)
     let score_text = text(`Score: ${score}`, 730, 55);
     let hiscore_text = text(`Hi-Score: ${hiscore}`, 730, 70)
     let level_text = text(`Level: ${level}`, 70, 55)
+    // NEED TO FIX THIS
     let control_text = text(`← Move Left | Move Right →
-
-Z : Shoot
-  X : Special
-P : Pause
-     M : Mute Sound
-`, width / 2, 80);
+Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
     let special_text = text(`Special: ${specialUsed ? "No" : "Yes"}`, 70, 70)
 
     //draw all the sprites added to the sketch so far
