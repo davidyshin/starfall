@@ -19,6 +19,7 @@ let base,
   bgm,
   gameoverbgm,
   startmenu_sound,
+  blink_text,
   explosions;
 let hearts;
 let gameStarted = false;
@@ -27,6 +28,7 @@ let paused = false;
 let exploded = false;
 let specialUsed = false;
 let muted = false;
+let blink = false;
 let hiscore = 0;
 let score = 0;
 let level = 1;
@@ -98,7 +100,11 @@ function draw() {
     text(`Welcome to Starfall.`, width / 2, height / 2.5)
     text(`Protect your city
 from the falling stars.`, width / 2, height / 2.1)
-    text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
+    if (!blink) {
+      blink_text = text(`Press "Space" or Click to start.`, width / 2, height / 1.7);
+    } else {
+      blink_text = text('')
+    }
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
       start_sound.play()
       startmenu_sound.stop()
@@ -165,6 +171,7 @@ P : Pause
       bullet.setSpeed(10, 270);
       bullet.life = 52;
       bullets.add(bullet)
+      bullet_sound.setVolume(.5)
       bullet_sound.play()
     }
 
@@ -204,7 +211,11 @@ P : Pause
     textAlign(CENTER)
     fill(255, 255, 255)
     text('GAME OVER', width / 2, height / 2 - 100)
-    text('Press "R" to play again.', width / 2, height / 2 - 50);
+    if (!blink) {
+      blink_text = text('Press "R" to play again.', width / 2, height / 2 - 50);
+    } else {
+      blink_text = text('')
+    }
     if (!exploded) {
       let g = createSprite(width / 2, height / 2, 50, 50)
       g.addAnimation("explosion", explosion)
@@ -429,6 +440,10 @@ function starHit(star, bullet) {
   score += 1
   bullet.remove();
 }
+
+setInterval(() => {
+  blink = !blink
+}, 500)
 
 function keyPressed() {
   if (keyCode === 80) {
