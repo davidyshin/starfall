@@ -136,7 +136,7 @@ from the falling stars.`, width / 2, height / 2.1)
     let level_text = text(`Level: ${level}`, 70, 55)
     // NEED TO FIX THIS
     let control_text = text(`← Move Left | Move Right →
-Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
+Z: Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
     let special_text = text(`Special: ${specialUsed ? "No" : "Yes"}`, 70, 70)
 
     //draw all the sprites added to the sketch so far
@@ -145,13 +145,15 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
       ship.setSpeed(0, 0);
     }
     if (keyDown("left")) {
-      if (ship.position.x > 30) {
+      if (ship.position.x > 50) {
         ship.setSpeed(25, 180);
       }
     }
 
     if (keyWentUp("left")) {
-      ship.setSpeed(1.5, 180);
+      if (ship.position.x > 50) {
+        ship.setSpeed(1.5, 180);
+      }
     }
     //keyDown is similar to keyIsDown() except it accepts both key codes and characters
     if (keyDown("right")) {
@@ -160,7 +162,9 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
       }
     }
     if (keyWentUp("right")) {
-      ship.setSpeed(1.5, 0);
+      if (ship.position.x < 750) {
+        ship.setSpeed(1.5, 0);
+      }
     }
 
     if (keyWentDown("z")) {
@@ -169,7 +173,6 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
       bullet.setSpeed(10, 270);
       bullet.life = 52;
       bullets.add(bullet)
-      bullet_sound.setVolume(.5)
       bullet_sound.play()
     }
 
@@ -208,9 +211,10 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
     background(bg_image)
     textAlign(CENTER)
     fill(255, 255, 255)
+    text(`Your Score:${score}`, width / 2, height / 2 - 70)
     text('GAME OVER', width / 2, height / 2 - 100)
     if (!blink) {
-      blink_text = text('Press "R" to play again.', width / 2, height / 2 - 50);
+      blink_text = text('Press "R" to play again.', width / 2, height / 2 - 30);
     } else {
       blink_text = text('')
     }
