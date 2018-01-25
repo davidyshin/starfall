@@ -173,6 +173,7 @@ Z: Shoot | X : Special | P : Pause | M : Mute Sound`, width / 2, 80);
       bullet.setSpeed(10, 270);
       bullet.life = 52;
       bullets.add(bullet)
+      bullet_sound.setVolume(.6)
       bullet_sound.play()
     }
 
