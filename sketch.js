@@ -53,6 +53,7 @@ function preload() {
   basehit_sound = loadSound('assets/sounds/basehit.wav')
   life_sound = loadSound('assets/sounds/life.wav')
   special_sound = loadSound('assets/sounds/special.wav')
+  pause_sound = loadSound('assets/sounds/pause.wav')
   bgm = loadSound('assets/sounds/bgm.ogg')
 }
 
@@ -73,6 +74,7 @@ function setup() {
   base.shapeColor = color(0)
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
+  masterVolume(1)
   // bgm.play()
   // creating 25 stars
 }
@@ -122,6 +124,7 @@ from the falling stars.`, width / 2, height / 2.1)
 Z : Shoot
   X : Special
 P : Pause
+     M : Mute Sound
 `, width / 2, 80);
     let special_text = text(`Special: ${specialUsed ? "No" : "Yes"}`, 70, 70)
 
@@ -170,12 +173,12 @@ P : Pause
       setTimeout(() => {
         specialUsed = true;
       }, 400)
-
       setTimeout(() => {
           specialUsed = false;
         },
         30000)
     }
+
     // if any stars "ovelap" any bullets, invokes starHit
     /// function which removes star (line 228)
     bullets.overlap(stars, starHit);
@@ -423,5 +426,13 @@ function keyPressed() {
     } else {
       loop()
     }
+    pause_sound.play()
+  } else if (keyCode === 77) {
+    if (!muted) {
+      masterVolume(0)
+    } else {
+      masterVolume(1)
+    }
+    muted = !muted
   }
 }

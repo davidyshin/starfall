@@ -14,9 +14,10 @@ Star-Fall is built using ES6 syntax JavaScript and the p5.js libraries. p5.js is
 
 ## Controls
 * ← and → to Move
-* Z to Shoot
-* X to use Special
-* P to Pause
+* Z : Shoot
+* X : use Special
+* P : Pause
+* M : Mute sound
 
 ## Future Features
 * Power-ups
