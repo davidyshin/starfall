@@ -37,7 +37,7 @@ let hp = 100;
 let font;
 
 function preload() {
-  // preloading images to use for stars, ship, bullet, animations
+  // preloading images to use for stars, sounds, ship, bullet, animations
   font = loadFont("assets/fonts/2p.ttf")
   ship_image = loadImage("assets/images/ship.png");
   star_image = loadImage("assets/images/star.png");
@@ -81,9 +81,8 @@ function setup() {
   hp_bar.shapeColor = color(0, 253, 47)
   ship.shapeColor = color(255, 255, 255)
   masterVolume(1)
+  // starts startmenu bgm
   startmenu_sound.loop()
-  // bgm.play()
-  // creating 25 stars
 }
 
 
@@ -106,8 +105,11 @@ from the falling stars.`, width / 2, height / 2.1)
       blink_text = text('')
     }
     if (keyWentDown("space") || mouseWentDown(LEFT)) {
+      // little beep sound plays when space or left click
       start_sound.play()
+      // stops startmenu bgm
       startmenu_sound.stop()
+      // starts regular game bgm
       bgm.loop()
       gameStarted = true
     }
@@ -380,10 +382,12 @@ function baseHit(star) {
   }
   basehit_sound.play()
   if (hp < 10) {
+    // explosion sound effect
     gameover_sound.play()
-
     gameOver = true;
+    // stops regular bgm
     bgm.stop()
+    // starts gameover bgm for gameover screen
     gameoverbgm.loop()
   }
   // e.life = 50
@@ -406,6 +410,9 @@ function baseHit(star) {
 }
 
 
+// function used for "special move" 800px width line goes up screen,
+// every star hit will create particle effects, however the special line does not disappear
+// until life runs out
 function specialHit(special, star) {
   star.remove();
   score += 1
@@ -423,6 +430,7 @@ function specialHit(special, star) {
   }
 }
 
+// function run to remove star and create particle explosion effect
 function starHit(star, bullet) {
   star.remove();
   starhit_sound.play()
@@ -440,21 +448,27 @@ function starHit(star, bullet) {
   score += 1
   bullet.remove();
 }
-
+// used to implement blinking text. every 500ms blink goes from true to false,
+// text will render depending on this
 setInterval(() => {
   blink = !blink
 }, 500)
 
 function keyPressed() {
+  // keyCode === "p"
   if (keyCode === 80) {
+    // pause game function
     paused = !paused
     if (paused && gameStarted) {
       noLoop()
     } else {
       loop()
     }
+    // plays a little beep everytime game is paused
     pause_sound.play()
+    // keyCode === "m"
   } else if (keyCode === 77) {
+    // mutes game
     if (!muted) {
       masterVolume(0)
     } else {
