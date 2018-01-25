@@ -10,9 +10,9 @@
 Star-Fall is built using ES6 syntax JavaScript and the p5.js libraries. p5.js is used for HTML5 canvas rendering and p5.play deals with the sprite class and handles collision detection.
 
 ## Preview
-![preview](./assets/preview/preview.gif =800x600)
-
-![gameover](./assets/preview/gameover.gif =800x600)
+<!-- ![preview](./assets/preview/preview.gif =800x600) -->
+<img src="./assets/preview/preview.gif" width="200" height="200" />
+<!-- ![gameover](./assets/preview/gameover.gif =800x600) -->
 
 ## Controls
 * ← and → to Move
