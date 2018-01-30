@@ -1,5 +1,5 @@
 ## Live
-[<span style="font-size:larger;">Click here for the Live version</span>](http://davidsh.in/star-fall)
+[Click here for the live version](http://davidsh.in/star-fall)
 
 ## Star-Fall
 **Star-Fall** is a fast-paced star shooter written in JavaScript and inspired by the 80's arcade game **Galaga**. The aim is to score as many points as possible by destroy an ever-increasing wave of stars before they hit the city.
