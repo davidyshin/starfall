@@ -20,6 +20,10 @@ let base,
   gameoverbgm,
   startmenu_sound,
   blink_text,
+  yellow_star,
+  blue_star,
+  green_star,
+  red_star,
   explosions,
   hearts;
 let gameStarted = false;
@@ -64,6 +68,22 @@ function preload() {
   gameoverbgm = loadSound("assets/sounds/gameoverbgm.ogg");
   startmenu_sound = loadSound("assets/sounds/startmenu.wav");
   bgm = loadSound("assets/sounds/bgm.ogg");
+  yellow_star = loadAnimation(
+    "assets/star/star_04.png",
+    "assets/star/star_09.png"
+  );
+  blue_star = loadAnimation(
+    "assets/star/star_10.png",
+    "assets/star/star_14.png"
+  );
+  green_star = loadAnimation(
+    "assets/star/star_16.png",
+    "assets/star/star_21.png"
+  );
+  red_star = loadAnimation(
+    "assets/star/star_22.png",
+    "assets/star/star_27.png"
+  );
 }
 
 function setup() {
@@ -200,7 +220,7 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`,
         special.life = 70;
         specials.add(special);
         special_sound.play();
-        specialUsed = true
+        specialUsed = true;
       }
       setTimeout(() => {
         specialUsed = false;
@@ -347,10 +367,26 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`,
 
 function createStar() {
   let star = createSprite(random(50, 750), random(-100, -3000), 50, 50);
+  let randomAnimation = Math.floor(Math.random() * 4) + 1;
+
   star.addSpeed(grav, 90);
   star.rotationSpeed = 2.5;
   stars.add(star);
-  star.addImage(star_image);
+  switch (randomAnimation) {
+    case 1:
+      star.addAnimation("yellow_star", yellow_star);
+      break;
+    case 2:
+      star.addAnimation("blue_star", blue_star);
+      break;
+    case 3:
+      star.addAnimation("green_star", green_star);
+      break;
+    case 4:
+      star.addAnimation("red_star", red_star);
+      break;
+  }
+  // star.addImage(star_image);
 }
 
 // creates heart in y position -200,
