@@ -69,21 +69,21 @@ function preload() {
   startmenu_sound = loadSound("assets/sounds/startmenu.wav");
   bgm = loadSound("assets/sounds/bgm.ogg");
   yellow_star = loadAnimation(
-    "assets/star/star_04.png",
-    "assets/star/star_09.png"
+    "assets/star-two/star_01.png",
+    "assets/star-two/star_06.png"
   );
-  blue_star = loadAnimation(
-    "assets/star/star_10.png",
-    "assets/star/star_14.png"
-  );
-  green_star = loadAnimation(
-    "assets/star/star_16.png",
-    "assets/star/star_21.png"
-  );
-  red_star = loadAnimation(
-    "assets/star/star_22.png",
-    "assets/star/star_27.png"
-  );
+  // blue_star = loadAnimation(
+  //   "assets/star/star_10.png",
+  //   "assets/star/star_14.png"
+  // );
+  // green_star = loadAnimation(
+  //   "assets/star/star_16.png",
+  //   "assets/star/star_21.png"
+  // );
+  // red_star = loadAnimation(
+  //   "assets/star/star_22.png",
+  //   "assets/star/star_27.png"
+  // );
 }
 
 function setup() {
@@ -372,20 +372,22 @@ function createStar() {
   star.addSpeed(grav, 90);
   star.rotationSpeed = 2.5;
   stars.add(star);
-  switch (randomAnimation) {
-    case 1:
-      star.addAnimation("yellow_star", yellow_star);
-      break;
-    case 2:
-      star.addAnimation("blue_star", blue_star);
-      break;
-    case 3:
-      star.addAnimation("green_star", green_star);
-      break;
-    case 4:
-      star.addAnimation("red_star", red_star);
-      break;
-  }
+  star.addAnimation("yellow_star", yellow_star);
+  
+  // switch (randomAnimation) {
+  //   case 1:
+  //     star.addAnimation("yellow_star", yellow_star);
+  //     break;
+  //   case 2:
+  //     star.addAnimation("blue_star", blue_star);
+  //     break;
+  //   case 3:
+  //     star.addAnimation("green_star", green_star);
+  //     break;
+  //   case 4:
+  //     star.addAnimation("red_star", red_star);
+  //     break;
+  // }
   // star.addImage(star_image);
 }
 
