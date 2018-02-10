@@ -39,6 +39,10 @@ let level = 1;
 let grav = 2;
 let hp = 100;
 let font;
+// Variable to store text currently being typed
+let typing = "";
+// Variable to store saved text when return is hit
+let saved = "";
 
 function preload() {
   // preloading images to use for stars, sounds, ship, bullet, animations
@@ -238,14 +242,25 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`,
   } else if (gameOver) {
     clear();
     // when gameover (hp reaches 0) is true below will render
-    textSize(30);
+    textSize(25);
     background(bg_image);
     textAlign(CENTER);
     fill(255, 255, 255);
     text(`Your Score:${score}`, width / 2, height / 2 - 70);
     text("GAME OVER", width / 2, height / 2 - 100);
+    let indent = 25;
+    // Set the font and fill for text
+    textFont(font);
+    // Display everything
+    text(typing, width / 2, height / 2 - 30);
+    text(saved, width / 2, height / 2 - 50);
     if (!blink) {
-      blink_text = text('Press "R" to play again.', width / 2, height / 2 - 30);
+      blink_text = text(
+        `Enter your name or
+  Press "R" to play again.`,
+        width / 2,
+        height / 2 - 180
+      );
     } else {
       blink_text = text("");
     }
@@ -373,7 +388,7 @@ function createStar() {
   star.rotationSpeed = 2.5;
   stars.add(star);
   star.addAnimation("yellow_star", yellow_star);
-  
+
   // switch (randomAnimation) {
   //   case 1:
   //     star.addAnimation("yellow_star", yellow_star);
@@ -501,20 +516,8 @@ setInterval(() => {
   blink = !blink;
 }, 500);
 
-function keyPressed() {
-  // keyCode === "p"
-  if (keyCode === 80) {
-    // pause game function
-    paused = !paused;
-    if (paused && gameStarted) {
-      noLoop();
-    } else {
-      loop();
-    }
-    // plays a little beep everytime game is paused
-    pause_sound.play();
-    // keyCode === "m"
-  } else if (keyCode === 77) {
+function keyPressed(event) {
+  if (keyCode === 77) {
     // mutes game
     if (!muted) {
       masterVolume(0);
@@ -522,5 +525,19 @@ function keyPressed() {
       masterVolume(1);
     }
     muted = !muted;
+  } else if (!gameOver && gameStarted) {
+    // keyCode === "p"
+    if (keyCode === 80) {
+      // pause game function
+      paused = !paused;
+      if (paused && gameStarted) {
+        noLoop();
+      } else {
+        loop();
+      }
+      // plays a little beep everytime game is paused
+      pause_sound.play();
+    }
+    // keyCode === "m"
   }
 }
