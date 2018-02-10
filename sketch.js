@@ -256,8 +256,7 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`,
     text(saved, width / 2, height / 2 - 50);
     if (!blink) {
       blink_text = text(
-        `Enter your name or
-  Press "R" to play again.`,
+        `Press "R" to play again.`,
         width / 2,
         height / 2 - 180
       );
@@ -539,5 +538,5 @@ function keyPressed(event) {
       pause_sound.play();
     }
     // keyCode === "m"
-  }
+  }s
 }
