@@ -106,7 +106,7 @@ function setup() {
   base.shapeColor = color(0);
   hp_bar.shapeColor = color(0, 253, 47);
   ship.shapeColor = color(255, 255, 255);
-  masterVolume(1);
+  masterVolume(.3);
   // starts startmenu bgm
   startmenu_sound.loop();
 }
@@ -212,7 +212,7 @@ Z : Shoot | X : Special | P : Pause | M : Mute Sound`,
       bullet.setSpeed(10, 270);
       bullet.life = 52;
       bullets.add(bullet);
-      bullet_sound.setVolume(0.6);
+      bullet_sound.setVolume(0.3);
       bullet_sound.play();
     }
 
