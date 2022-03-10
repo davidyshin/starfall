@@ -106,7 +106,7 @@ function setup() {
   base.shapeColor = color(0);
   hp_bar.shapeColor = color(0, 253, 47);
   ship.shapeColor = color(255, 255, 255);
-  masterVolume(.3);
+  masterVolume(.05);
   // starts startmenu bgm
   startmenu_sound.loop();
 }
@@ -521,7 +521,7 @@ function keyPressed(event) {
     if (!muted) {
       masterVolume(0);
     } else {
-      masterVolume(.3);
+      masterVolume(.05);
     }
     muted = !muted;
   } else if (!gameOver && gameStarted) {
