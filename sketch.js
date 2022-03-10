@@ -521,7 +521,7 @@ function keyPressed(event) {
     if (!muted) {
       masterVolume(0);
     } else {
-      masterVolume(1);
+      masterVolume(.3);
     }
     muted = !muted;
   } else if (!gameOver && gameStarted) {
