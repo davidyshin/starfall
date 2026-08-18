@@ -1,0 +1,280 @@
+@font-face {
+  font-family: "Starfall Pixel";
+  src: url("assets/fonts/2p.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+.game-layout {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  width: min(800px, 100%);
+}
+
+.game-guide {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  padding: 1.35rem 1.2rem 1.2rem;
+  border: 3px double #4c8995;
+  border-radius: 0;
+  color: #afc0c2;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 1.5%) 0,
+      rgb(255 255 255 / 1.5%) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    #030809;
+  box-shadow:
+    0 0 0 3px #000,
+    7px 7px 0 #163942,
+    10px 10px 0 #000;
+}
+
+.game-guide::before,
+.game-guide::after {
+  position: absolute;
+  top: 0.45rem;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #456168;
+  border-radius: 50%;
+  background: #11191b;
+  content: "";
+}
+
+.game-guide::before {
+  left: 0.45rem;
+}
+
+.game-guide::after {
+  right: 0.45rem;
+}
+
+.guide-title {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.2rem 0 0.85rem;
+  border-bottom: 3px double #244b55;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.guide-title span {
+  color: #8be8e5;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  text-shadow: 2px 2px 0 #173e47;
+}
+
+.guide-title small {
+  color: #c26499;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.4rem;
+  letter-spacing: 0.08em;
+}
+
+.game-guide section,
+.game-guide p,
+.game-guide dl,
+.game-guide ul {
+  margin: 0;
+}
+
+.game-guide h2 {
+  margin: 0 0 0.75rem;
+  padding: 0.3rem 0.45rem;
+  border-left: 3px solid #9b4f7c;
+  color: #86d0d6;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.62rem;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #071014;
+}
+
+.control-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.control-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed #1d383e;
+}
+
+.control-list dd {
+  margin: 0;
+  color: #c3e4df;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.55rem;
+  line-height: 1.8;
+}
+
+.power-up-list {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0;
+  list-style: none;
+}
+
+.power-up-list li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.45rem 0.55rem;
+  border-left: 2px solid #397a8a;
+  border-radius: 0;
+  background: #050b0d;
+}
+
+.power-up-list li:nth-child(2) {
+  border-left-color: #8b3d50;
+}
+
+.power-up-list li:nth-child(3) {
+  border-left-color: #88733b;
+}
+
+.power-up-list li:nth-child(4) {
+  border-left-color: #377c63;
+}
+
+.power-up-list strong {
+  color: #b5cbc9;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.5rem;
+  line-height: 1.7;
+}
+
+.power-up-list span,
+.boss-tip,
+.game-status {
+  color: #a4b2c1;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.active-effect-list {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+.active-effect-list li {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #183144;
+  border-radius: 0;
+  color: #8dd2c9;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.48rem;
+  line-height: 1.7;
+  background: #03090a;
+}
+
+#boss-status {
+  margin-top: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #9b4f7c;
+  color: #c6699e;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.48rem;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+@media (min-width: 1351px) {
+  .game-guide {
+    position: fixed;
+    top: 50%;
+    right: clamp(1rem, 3vw, 3.5rem);
+    width: 17rem;
+    max-height: calc(100vh - 2rem);
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 720px) {
+  .game-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+body {
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  min-height: 100vh;
+  padding: 1rem;
+  overflow: auto;
+}
+
+main,
+canvas {
+  display: block;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+.site-footer {
+  justify-self: center;
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  color: #365964;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.5rem;
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site-footer a {
+  color: #8fd3dc;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+
+.site-footer a:visited {
+  color: #8fd3dc;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
+  color: #a9f1ee;
+  text-shadow: 0 0 7px rgb(118 211 210 / 70%);
+}

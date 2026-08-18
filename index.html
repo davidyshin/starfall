@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Starfall, a fast-paced arcade shooter built with p5.js.">
+    <title>Starfall</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <script defer src="p5/p5.js"></script>
+    <script defer src="p5/addons/p5.sound.js"></script>
+    <script defer src="p5/addons/p5.play.js"></script>
+    <script defer src="sketch.js"></script>
+  </head>
+  <body>
+    <div class="game-layout">
+      <main aria-label="Starfall game"></main>
+      <aside class="game-guide" aria-label="Game information">
+        <header class="guide-title">
+          <span>Player Guide</span>
+          <small>Starfall // City Defense</small>
+        </header>
+        <section>
+          <h2>Controls</h2>
+          <dl class="control-list">
+            <div><dt>Move</dt><dd>← →</dd></div>
+            <div><dt>Shoot</dt><dd>Space</dd></div>
+            <div><dt>Special</dt><dd>Z at 100%</dd></div>
+            <div><dt>Pause / mute</dt><dd>P / M</dd></div>
+          </dl>
+        </section>
+        <section>
+          <h2>Power-ups</h2>
+          <ul class="power-up-list">
+            <li><strong>Blue · Rapid Fire</strong><span>Hold Space to fire faster.</span></li>
+            <li><strong>Red · Spread Shot</strong><span>Fire three bullets at once.</span></li>
+            <li><strong>Yellow · Slow Time</strong><span>Falling stars move slower.</span></li>
+            <li><strong>Green · Shield</strong><span>Blocks the next three hits.</span></li>
+          </ul>
+        </section>
+        <section class="game-status" aria-live="polite">
+          <h2>Status</h2>
+          <ul class="active-effect-list" id="active-effects">
+            <li>No active power-ups</li>
+          </ul>
+          <p id="boss-status" hidden></p>
+        </section>
+        <p class="boss-tip"><strong>Boss waves:</strong> Shoot the giant ship and dodge its pink shots.</p>
+      </aside>
+    </div>
+    <footer class="site-footer">
+      <a href="https://davidsh.in">Built by DS</a>
+      <span aria-hidden="true">//</span>
+      <a href="https://github.com/davidyshin/star-fall">GitHub</a>
+    </footer>
+  </body>
+</html>
