@@ -1,6 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
+const VERSION = "1.1.0";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -52,6 +53,10 @@ const ENDLESS = Object.freeze({
 const assets = { images: {}, sounds: {}, animations: {} };
 const groups = {};
 const sprites = {};
+const touchControls = { left: false, right: false };
+let touchMode = false;
+let orientationPaused = false;
+let guidePaused = false;
 const state = {
   screen: SCREEN.START,
   paused: false,
@@ -163,6 +168,10 @@ function setup() {
   assets.sounds.gameMusic.setLoop(true);
   assets.sounds.gameOverMusic.setLoop(true);
   assets.sounds.menuMusic.loop();
+  touchMode = window.matchMedia("(pointer: coarse)").matches;
+  bindTouchControls(canvas.elt);
+  bindGuideModal();
+  bindOrientationHandling();
 }
 
 function draw() {
@@ -211,7 +220,9 @@ function updateGame() {
   updateStars();
   updateBosses();
   removeOffscreenPlayerShots();
-  if (keyDown("space") && millis() >= state.nextShotAt) shoot();
+  if ((keyDown("space") || touchMode) && millis() >= state.nextShotAt) {
+    shoot();
+  }
   if (keyWentDown("z")) useSpecial();
 
   groups.bullets.overlap(groups.stars, bulletHitStar);
@@ -257,7 +268,7 @@ function drawGame() {
 
 function drawHud() {
   setTextStyle(15, BOLD);
-  text("Starfall", width / 2, 45);
+  text(`Starfall v${VERSION}`, width / 2, 45);
   setTextStyle(10, NORMAL);
   text(`CITY HP: ${state.health}`, width / 2, 65);
   text(`Score: ${state.score}`, 730, 55);
@@ -269,8 +280,8 @@ function drawHud() {
 
 function updateShip() {
   let velocity = 0;
-  if (keyDown("left")) velocity -= GAME.shipSpeed;
-  if (keyDown("right")) velocity += GAME.shipSpeed;
+  if (keyDown("left") || touchControls.left) velocity -= GAME.shipSpeed;
+  if (keyDown("right") || touchControls.right) velocity += GAME.shipSpeed;
   sprites.ship.velocity.x = velocity;
   sprites.ship.position.x = constrain(
     sprites.ship.position.x,
@@ -717,7 +728,7 @@ function drawGameOverScreen() {
   text(`Your Score: ${state.score}`, width / 2, height / 2 - 70);
   setTextStyle(12, NORMAL);
   text(`Best Combo: ${state.maxCombo}`, width / 2, height / 2 - 42);
-  drawBlinkingText('Press "R" to play again.', height / 2 - 180);
+  drawBlinkingText('Press "R" or tap to play again.', height / 2 - 180);
 
   if (!state.explosionCreated) {
     const explosion = createSprite(width / 2, height / 2, 50, 50);
@@ -798,6 +809,89 @@ function updateExternalUi() {
   bossStatus.textContent = boss
     ? `Boss HP: ${Math.max(0, boss.health)} / ${boss.maxHealth}`
     : "";
+}
+
+function bindTouchControls(canvasElement) {
+  document.querySelectorAll("[data-control]").forEach((button) => {
+    const control = button.dataset.control;
+
+    button.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      button.setPointerCapture(event.pointerId);
+
+      if (control === "left" || control === "right") {
+        touchControls[control] = true;
+      }
+      if (state.screen === SCREEN.PLAYING && control === "special") useSpecial();
+      if (control === "pause" && state.screen === SCREEN.PLAYING) togglePause();
+    });
+
+    const releaseControl = () => {
+      if (control === "left" || control === "right") {
+        touchControls[control] = false;
+      }
+    };
+    button.addEventListener("pointerup", releaseControl);
+    button.addEventListener("pointercancel", releaseControl);
+    button.addEventListener("lostpointercapture", releaseControl);
+  });
+
+  canvasElement.addEventListener("pointerdown", () => {
+    if (touchMode && state.screen === SCREEN.START) startGame();
+    if (touchMode && state.screen === SCREEN.GAME_OVER) resetGame();
+  });
+}
+
+function bindGuideModal() {
+  const guide = document.getElementById("game-guide");
+  const openButton = document.getElementById("guide-toggle");
+  const closeButton = guide.querySelector(".guide-close");
+
+  if (!touchMode) {
+    guide.show();
+    return;
+  }
+
+  openButton.addEventListener("click", () => {
+    if (state.screen === SCREEN.PLAYING && !state.paused) {
+      guidePaused = true;
+      setPaused(true);
+    }
+    guide.showModal();
+  });
+
+  closeButton.addEventListener("click", () => guide.close());
+  guide.addEventListener("click", (event) => {
+    if (event.target === guide) guide.close();
+  });
+  guide.addEventListener("close", () => {
+    if (guidePaused) {
+      guidePaused = false;
+      setPaused(false);
+    }
+  });
+}
+
+function bindOrientationHandling() {
+  const portraitQuery = window.matchMedia(
+    "(orientation: portrait) and (max-width: 900px) and (pointer: coarse)"
+  );
+  const handleOrientation = (event) => {
+    if (event.matches && state.screen === SCREEN.PLAYING && !state.paused) {
+      orientationPaused = true;
+      setPaused(true);
+    } else if (!event.matches && orientationPaused) {
+      orientationPaused = false;
+      setPaused(false);
+    }
+  };
+
+  if (portraitQuery.addEventListener) {
+    portraitQuery.addEventListener("change", handleOrientation);
+  } else {
+    portraitQuery.addListener(handleOrientation);
+  }
+  handleOrientation(portraitQuery);
 }
 
 function keyPressed(event) {

@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="Starfall, a fast-paced arcade shooter built with p5.js.">
+    <meta name="application-version" content="1.1.0">
     <title>Starfall</title>
     <link rel="icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="style.css">
@@ -13,26 +14,53 @@
     <script defer src="sketch.js"></script>
   </head>
   <body>
+    <div class="orientation-notice" role="status">
+      <span class="rotate-icon" aria-hidden="true">↻</span>
+      <strong>Rotate to landscape</strong>
+      <span>Starfall requires a wider flight deck.</span>
+    </div>
+    <button class="guide-toggle" id="guide-toggle" type="button">Guide</button>
     <div class="game-layout">
       <main aria-label="Starfall game"></main>
-      <aside class="game-guide" aria-label="Game information">
+      <nav class="touch-controls" aria-label="Touch game controls">
+        <button type="button" data-control="left" aria-label="Move left">←</button>
+        <button type="button" data-control="right" aria-label="Move right">→</button>
+        <button type="button" data-control="special">Special</button>
+        <button type="button" data-control="pause" aria-label="Pause or resume">P</button>
+      </nav>
+      <dialog class="game-guide" id="game-guide" aria-label="Game information">
         <header class="guide-title">
           <span>Player Guide</span>
           <small>Starfall // City Defense</small>
+          <button class="guide-close" type="button" aria-label="Close guide">×</button>
         </header>
         <section>
           <h2>Controls</h2>
           <dl class="control-list">
             <div><dt>Move</dt><dd>← →</dd></div>
-            <div><dt>Shoot</dt><dd>Space</dd></div>
-            <div><dt>Special</dt><dd>Z at 100%</dd></div>
-            <div><dt>Pause / mute</dt><dd>P / M</dd></div>
+            <div>
+              <dt>Shoot</dt>
+              <dd>
+                <span class="desktop-control">Space</span>
+                <span class="mobile-control">Automatic</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Special</dt>
+              <dd>
+                <span class="desktop-control">Z at 100%</span>
+                <span class="mobile-control">Button at 100%</span>
+              </dd>
+            </div>
+            <div><dt>Pause</dt><dd>P</dd></div>
+            <div class="desktop-control-row"><dt>Mute</dt><dd>M</dd></div>
           </dl>
+          <p class="touch-hint">Use the corner arrows to move. Special sits above the right arrow.</p>
         </section>
         <section>
           <h2>Power-ups</h2>
           <ul class="power-up-list">
-            <li><strong>Blue · Rapid Fire</strong><span>Hold Space to fire faster.</span></li>
+            <li><strong>Blue · Rapid Fire</strong><span>Increases the firing rate.</span></li>
             <li><strong>Red · Spread Shot</strong><span>Fire three bullets at once.</span></li>
             <li><strong>Yellow · Slow Time</strong><span>Falling stars move slower.</span></li>
             <li><strong>Green · Shield</strong><span>Blocks the next three hits.</span></li>
@@ -46,7 +74,7 @@
           <p id="boss-status" hidden></p>
         </section>
         <p class="boss-tip"><strong>Boss waves:</strong> Shoot the giant ship and dodge its pink shots.</p>
-      </aside>
+      </dialog>
     </div>
     <footer class="site-footer">
       <a href="https://davidsh.in">Built by DS</a>

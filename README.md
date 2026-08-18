@@ -1,5 +1,7 @@
 # Starfall
 
+**Current release: 1.1.0**
+
 [Play the live version](https://starfall.netlify.app)
 
 Starfall is a fast-paced JavaScript shooter inspired by 1980s arcade games such as **Galaga**. Destroy the falling stars before they hit the city, collect hearts to restore its health, and save your special attack for emergencies.
@@ -33,6 +35,8 @@ The game uses vendored p5.js, p5.sound, and p5.play builds, so no package instal
 - <kbd>Z</kbd>: use the special attack
 - <kbd>P</kbd>: pause or resume
 - <kbd>M</kbd>: mute or unmute
+
+On mobile, rotate to landscape. Firing is automatic; use the corner arrows to move and the on-screen buttons for the special attack, pause, and guide.
 
 Your high score is saved in the browser.
 

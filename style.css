@@ -24,15 +24,63 @@ body {
   display: grid;
   place-items: center;
   gap: 1rem;
-  width: min(800px, 100%);
+  width: min(880px, 100%);
+}
+
+.orientation-notice {
+  display: none;
+}
+
+.guide-toggle {
+  display: none;
+  padding: 0.55rem 0.7rem;
+  border: 2px solid #315b65;
+  border-radius: 0;
+  color: #a9e4e1;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  background: #050b0d;
+  box-shadow: 3px 3px 0 #102a31;
+  cursor: pointer;
+}
+
+.touch-controls {
+  display: none;
+}
+
+.touch-controls button {
+  min-height: 3.25rem;
+  padding: 0.5rem 0.25rem;
+  border: 2px solid #315b65;
+  border-radius: 0;
+  color: #a9e4e1;
+  font-family: "Starfall Pixel", monospace;
+  font-size: 0.52rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  background: #050b0d;
+  box-shadow: 3px 3px 0 #102a31;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-controls button:active {
+  color: #fff;
+  background: #17343b;
+  box-shadow: 1px 1px 0 #102a31;
+  transform: translate(2px, 2px);
 }
 
 .game-guide {
   position: relative;
-  display: grid;
+  display: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   width: 100%;
+  max-height: none;
+  margin: 0;
   padding: 1.35rem 1.2rem 1.2rem;
   border: 3px double #4c8995;
   border-radius: 0;
@@ -50,6 +98,16 @@ body {
     0 0 0 3px #000,
     7px 7px 0 #163942,
     10px 10px 0 #000;
+  overflow-y: auto;
+}
+
+.game-guide[open] {
+  display: grid;
+}
+
+.game-guide::backdrop {
+  background: rgb(0 0 0 / 82%);
+  backdrop-filter: blur(2px);
 }
 
 .game-guide::before,
@@ -80,6 +138,21 @@ body {
   border-bottom: 3px double #244b55;
   text-align: center;
   text-transform: uppercase;
+}
+
+.guide-close {
+  display: none;
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid #4c8995;
+  color: #8be8e5;
+  font: 1.25rem/1 monospace;
+  background: #030809;
+  cursor: pointer;
 }
 
 .guide-title span {
@@ -137,6 +210,18 @@ body {
   font-family: "Starfall Pixel", monospace;
   font-size: 0.55rem;
   line-height: 1.8;
+}
+
+.touch-hint {
+  display: none;
+  margin-top: 0.7rem !important;
+  color: #758d91;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.mobile-control {
+  display: none;
 }
 
 .power-up-list {
@@ -211,8 +296,14 @@ body {
   font-weight: 700;
 }
 
-@media (min-width: 1351px) {
+@media (max-width: 720px) {
   .game-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1501px) {
+  .game-guide[open] {
     position: fixed;
     top: 50%;
     right: clamp(1rem, 3vw, 3.5rem);
@@ -221,12 +312,6 @@ body {
     grid-template-columns: 1fr;
     overflow-y: auto;
     transform: translateY(-50%);
-  }
-}
-
-@media (max-width: 720px) {
-  .game-guide {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -245,8 +330,175 @@ canvas {
 }
 
 canvas {
+  width: min(880px, 100%);
   max-width: 100%;
   height: auto !important;
+  touch-action: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .touch-hint {
+    display: block;
+  }
+
+  .desktop-control {
+    display: none;
+  }
+
+  .mobile-control {
+    display: inline;
+  }
+
+  .desktop-control-row {
+    display: none;
+  }
+
+  .guide-toggle {
+    position: fixed;
+    z-index: 30;
+    top: max(0.75rem, env(safe-area-inset-top));
+    right: max(0.75rem, env(safe-area-inset-right));
+    display: block;
+  }
+
+  .game-guide {
+    position: fixed;
+    inset: 0;
+    width: min(42rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+  }
+
+  .guide-close {
+    display: block;
+  }
+
+  .touch-controls {
+    position: fixed;
+    z-index: 25;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .touch-controls button {
+    position: fixed;
+    width: 4.5rem;
+    min-height: 4.5rem;
+    pointer-events: auto;
+  }
+
+  .touch-controls [data-control="left"] {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    left: max(0.75rem, env(safe-area-inset-left));
+    font-size: 1.3rem;
+  }
+
+  .touch-controls [data-control="right"] {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    font-size: 1.3rem;
+  }
+
+  .touch-controls [data-control="special"] {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 5.25rem);
+  }
+
+  .touch-controls [data-control="special"]:active {
+    transform: translate(2px, 2px);
+  }
+
+  .touch-controls [data-control="pause"] {
+    top: max(0.75rem, env(safe-area-inset-top));
+    left: max(0.75rem, env(safe-area-inset-left));
+    width: 3rem;
+    min-height: 3rem;
+  }
+}
+
+@media (orientation: landscape) and (hover: none),
+  (orientation: landscape) and (pointer: coarse) {
+  body {
+    place-content: start center;
+    padding:
+      max(0.35rem, env(safe-area-inset-top))
+      max(0.5rem, env(safe-area-inset-right))
+      max(0.35rem, env(safe-area-inset-bottom))
+      max(0.5rem, env(safe-area-inset-left));
+  }
+
+  canvas {
+    width: auto !important;
+    max-width: 100%;
+    height: auto !important;
+    max-height: calc(100dvh - 0.75rem);
+  }
+
+  .game-layout {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 620px) {
+  body {
+    place-content: start center;
+    padding: 0.5rem;
+  }
+
+  .game-layout {
+    gap: 0.65rem;
+  }
+
+}
+
+@media (orientation: portrait) and (max-width: 900px) and (pointer: coarse) {
+  .orientation-notice {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: #8be8e5;
+    font-family: "Starfall Pixel", monospace;
+    text-align: center;
+    text-transform: uppercase;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgb(255 255 255 / 2%) 0,
+        rgb(255 255 255 / 2%) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      #010405;
+  }
+
+  .orientation-notice strong {
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+
+  .orientation-notice span:last-child {
+    max-width: 24rem;
+    color: #879da0;
+    font-size: 0.52rem;
+    line-height: 1.8;
+  }
+
+  .rotate-icon {
+    font: 3rem/1 system-ui, sans-serif;
+    animation: rotate-device 1.8s steps(4, end) infinite;
+  }
+}
+
+@keyframes rotate-device {
+  to {
+    transform: rotate(90deg);
+  }
 }
 
 .site-footer {
