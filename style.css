@@ -336,108 +336,103 @@ canvas {
   touch-action: none;
 }
 
-@media (hover: none), (pointer: coarse) {
-  .touch-hint {
+.touch-device .touch-hint {
     display: block;
-  }
+}
 
-  .desktop-control {
+.touch-device .desktop-control {
     display: none;
-  }
+}
 
-  .mobile-control {
+.touch-device .mobile-control {
     display: inline;
-  }
+}
 
-  .desktop-control-row {
+.touch-device .desktop-control-row {
     display: none;
-  }
+}
 
-  .guide-toggle {
+.touch-device .guide-toggle {
     position: fixed;
     z-index: 30;
     top: max(0.75rem, env(safe-area-inset-top));
     right: max(0.75rem, env(safe-area-inset-right));
     display: block;
-  }
+}
 
-  .game-guide {
+.touch-device .game-guide {
     position: fixed;
     inset: 0;
     width: min(42rem, calc(100% - 2rem));
     max-height: calc(100dvh - 2rem);
     margin: auto;
-  }
+}
 
-  .guide-close {
+.touch-device .guide-close {
     display: block;
-  }
+}
 
-  .touch-controls {
+.touch-device .touch-controls {
     position: fixed;
     z-index: 25;
     inset: 0;
     display: block;
     pointer-events: none;
-  }
+}
 
-  .touch-controls button {
+.touch-device .touch-controls button {
     position: fixed;
     width: 4.5rem;
     min-height: 4.5rem;
     pointer-events: auto;
-  }
+}
 
-  .touch-controls [data-control="left"] {
+.touch-device .touch-controls [data-control="left"] {
     bottom: max(0.75rem, env(safe-area-inset-bottom));
     left: max(0.75rem, env(safe-area-inset-left));
     font-size: 1.3rem;
-  }
+}
 
-  .touch-controls [data-control="right"] {
+.touch-device .touch-controls [data-control="right"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: max(0.75rem, env(safe-area-inset-bottom));
     font-size: 1.3rem;
-  }
+}
 
-  .touch-controls [data-control="special"] {
+.touch-device .touch-controls [data-control="special"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 5.25rem);
-  }
+}
 
-  .touch-controls [data-control="special"]:active {
+.touch-device .touch-controls [data-control="special"]:active {
     transform: translate(2px, 2px);
-  }
+}
 
-  .touch-controls [data-control="pause"] {
+.touch-device .touch-controls [data-control="pause"] {
     top: max(0.75rem, env(safe-area-inset-top));
     left: max(0.75rem, env(safe-area-inset-left));
     width: 3rem;
     min-height: 3rem;
-  }
 }
 
-@media (orientation: landscape) and (hover: none),
-  (orientation: landscape) and (pointer: coarse) {
-  body {
+.touch-device:not(.portrait-mode) body {
     place-content: start center;
     padding:
       max(0.35rem, env(safe-area-inset-top))
       max(0.5rem, env(safe-area-inset-right))
       max(0.35rem, env(safe-area-inset-bottom))
       max(0.5rem, env(safe-area-inset-left));
-  }
+}
 
-  canvas {
+.touch-device:not(.portrait-mode) canvas {
     width: auto !important;
     max-width: 100%;
     height: auto !important;
     max-height: calc(100dvh - 0.75rem);
-  }
+}
 
-  .game-layout {
+.touch-device:not(.portrait-mode) .game-layout {
     gap: 0.5rem;
-  }
 }
 
 @media (max-width: 620px) {
@@ -452,8 +447,7 @@ canvas {
 
 }
 
-@media (orientation: portrait) and (max-width: 900px) and (pointer: coarse) {
-  .orientation-notice {
+.touch-device.portrait-mode .orientation-notice {
     position: fixed;
     z-index: 100;
     inset: 0;
@@ -475,24 +469,23 @@ canvas {
         transparent 4px
       ),
       #010405;
-  }
+}
 
-  .orientation-notice strong {
+.touch-device.portrait-mode .orientation-notice strong {
     font-size: 0.8rem;
     line-height: 1.7;
-  }
+}
 
-  .orientation-notice span:last-child {
+.touch-device.portrait-mode .orientation-notice span:last-child {
     max-width: 24rem;
     color: #879da0;
     font-size: 0.52rem;
     line-height: 1.8;
-  }
+}
 
-  .rotate-icon {
+.touch-device.portrait-mode .rotate-icon {
     font: 3rem/1 system-ui, sans-serif;
     animation: rotate-device 1.8s steps(4, end) infinite;
-  }
 }
 
 @keyframes rotate-device {

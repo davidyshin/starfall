@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.0";
+const VERSION = "1.1.1";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -16,7 +16,9 @@ const GAME = Object.freeze({
   maxStarCount: 24,
   shipMinX: 50,
   shipMaxX: 750,
-  shipSpeed: 25,
+  shipAcceleration: 3.5,
+  shipMaxSpeed: 18,
+  shipDrag: 0.55,
   starSpawnMinY: -1400,
   starSpawnMaxY: -60,
   maxSpecialCharge: 100,
@@ -168,7 +170,11 @@ function setup() {
   assets.sounds.gameMusic.setLoop(true);
   assets.sounds.gameOverMusic.setLoop(true);
   assets.sounds.menuMusic.loop();
-  touchMode = window.matchMedia("(pointer: coarse)").matches;
+  touchMode =
+    navigator.maxTouchPoints > 0 ||
+    "ontouchstart" in window ||
+    window.matchMedia("(pointer: coarse)").matches;
+  document.documentElement.classList.toggle("touch-device", touchMode);
   bindTouchControls(canvas.elt);
   bindGuideModal();
   bindOrientationHandling();
@@ -279,15 +285,35 @@ function drawHud() {
 }
 
 function updateShip() {
-  let velocity = 0;
-  if (keyDown("left") || touchControls.left) velocity -= GAME.shipSpeed;
-  if (keyDown("right") || touchControls.right) velocity += GAME.shipSpeed;
-  sprites.ship.velocity.x = velocity;
+  const movingLeft = keyDown("left") || touchControls.left;
+  const movingRight = keyDown("right") || touchControls.right;
+  const direction = Number(movingRight) - Number(movingLeft);
+
+  if (direction !== 0) {
+    sprites.ship.velocity.x = constrain(
+      sprites.ship.velocity.x + direction * GAME.shipAcceleration,
+      -GAME.shipMaxSpeed,
+      GAME.shipMaxSpeed
+    );
+  } else {
+    sprites.ship.velocity.x *= GAME.shipDrag;
+    if (abs(sprites.ship.velocity.x) < 0.1) sprites.ship.velocity.x = 0;
+  }
+
   sprites.ship.position.x = constrain(
     sprites.ship.position.x,
     GAME.shipMinX,
     GAME.shipMaxX
   );
+
+  const atLeftEdge = sprites.ship.position.x <= GAME.shipMinX;
+  const atRightEdge = sprites.ship.position.x >= GAME.shipMaxX;
+  if (
+    (atLeftEdge && sprites.ship.velocity.x < 0) ||
+    (atRightEdge && sprites.ship.velocity.x > 0)
+  ) {
+    sprites.ship.velocity.x = 0;
+  }
 }
 
 function shoot() {
@@ -873,25 +899,22 @@ function bindGuideModal() {
 }
 
 function bindOrientationHandling() {
-  const portraitQuery = window.matchMedia(
-    "(orientation: portrait) and (max-width: 900px) and (pointer: coarse)"
-  );
-  const handleOrientation = (event) => {
-    if (event.matches && state.screen === SCREEN.PLAYING && !state.paused) {
+  const handleOrientation = () => {
+    const isPortrait = touchMode && window.innerHeight > window.innerWidth;
+    document.documentElement.classList.toggle("portrait-mode", isPortrait);
+
+    if (isPortrait && state.screen === SCREEN.PLAYING && !state.paused) {
       orientationPaused = true;
       setPaused(true);
-    } else if (!event.matches && orientationPaused) {
+    } else if (!isPortrait && orientationPaused) {
       orientationPaused = false;
       setPaused(false);
     }
   };
 
-  if (portraitQuery.addEventListener) {
-    portraitQuery.addEventListener("change", handleOrientation);
-  } else {
-    portraitQuery.addListener(handleOrientation);
-  }
-  handleOrientation(portraitQuery);
+  window.addEventListener("resize", handleOrientation);
+  window.addEventListener("orientationchange", handleOrientation);
+  handleOrientation();
 }
 
 function keyPressed(event) {

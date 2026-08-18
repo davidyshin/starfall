@@ -1,6 +1,6 @@
 # Starfall
 
-**Current release: 1.1.0**
+**Current release: 1.1.1**
 
 [Play the live version](https://starfall.netlify.app)
 
