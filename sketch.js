@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.2";
+const VERSION = "1.1.3";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -93,6 +93,9 @@ function preload() {
   assets.images.background = loadImage("assets/images/background.png");
   assets.images.startBackground = loadImage("assets/images/startbg.png");
   assets.images.boss = loadImage("assets/opengameart/boss/BlueBoss_1.png");
+  assets.images.bossLaser = loadImage(
+    "assets/opengameart/projectiles/boss-laser.png"
+  );
   assets.images.powerUps = {
     rapidFire: loadImage("assets/opengameart/powerups/rapid-fire.png"),
     spreadShot: loadImage("assets/opengameart/powerups/spread-shot.png"),
@@ -243,7 +246,7 @@ function updateGame() {
   groups.stars.overlap(sprites.base, starHitBase);
   groups.hearts.overlap(sprites.ship, collectHeart);
   groups.powerUps.overlap(sprites.ship, collectPowerUp);
-  groups.enemyBullets.overlap(sprites.base, enemyBulletHitBase);
+  groups.enemyBullets.overlap(sprites.ship, enemyBulletHitShip);
   groups.specials.overlap(groups.stars, specialHitStar);
   groups.specials.overlap(groups.bosses, specialHitBoss);
   updateLevel();
@@ -667,8 +670,9 @@ function updateBosses() {
 
 function createEnemyBullet(x, y) {
   const projectile = createSprite(x, y, 12, 18);
-  projectile.shapeColor = color(255, 60, 180);
-  projectile.setCollider("rectangle", 0, 0, 10, 17);
+  projectile.addImage(assets.images.bossLaser);
+  projectile.scale = 0.5;
+  projectile.setCollider("rectangle", 0, 0, 22, 44);
   projectile.setSpeed(6, 90);
   projectile.life = 100;
   groups.enemyBullets.add(projectile);
@@ -700,15 +704,13 @@ function damageBoss(boss, damage, awardsSpecialCharge) {
   state.shakeUntil = millis() + 700;
 }
 
-function enemyBulletHitBase(projectile) {
+function enemyBulletHitShip(projectile) {
+  if (projectile.removed || state.screen !== SCREEN.PLAYING) return;
   projectile.remove();
-  if (state.powerUps.shieldHits > 0) state.powerUps.shieldHits -= 1;
-  else state.health = Math.max(0, state.health - 4);
   state.combo = 0;
-  updateHealthBar();
   triggerImpactEffects();
   assets.sounds.baseHit.play();
-  if (state.health === 0) endGame();
+  endGame();
 }
 
 function drawWaveAnnouncement() {

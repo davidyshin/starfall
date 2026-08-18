@@ -1,6 +1,6 @@
 # Starfall
 
-**Current release: 1.1.2**
+**Current release: 1.1.3**
 
 [Play the live version](https://starfall.netlify.app)
 
@@ -46,7 +46,7 @@ Your high score is saved in the browser.
 - Blue stars are fast, green stars are armored, and red stars weave as they fall.
 - Destroyed stars can drop color-coded rapid fire, spread shot, slow time, or a three-hit shield. Their colors and effects are explained in the game information panel.
 - Hits charge the special meter; press <kbd>Z</kbd> when it reaches 100%.
-- Every fifth wave becomes a dedicated boss encounter with no regular stars. Bosses move and fire pink shots at the city.
+- Every fifth wave becomes a dedicated boss encounter with no regular stars. Bosses move and fire energy shots that only collide with the ship; one direct hit ends the run.
 - Screen shake, flashes, particles, and wave announcements provide combat feedback.
 
 ## Author
@@ -60,4 +60,5 @@ Your high score is saved in the browser.
 Boss and power-up sprites are CC0 assets from OpenGameArt:
 
 - [SpaceShip Boss Set](https://opengameart.org/content/spaceship-boss-set) by The_Scientist___
+- [Spaceship Bullet](https://opengameart.org/content/spaceship-bullet) by vergil1018 (CC0)
 - [Powerup (Animated Orb)](https://opengameart.org/content/powerup-animated-orb) by jcrown41
