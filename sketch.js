@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.1";
+const VERSION = "1.1.2";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -26,6 +26,7 @@ const GAME = Object.freeze({
   rapidShotCooldownMs: 80,
   powerUpDurationMs: 12000,
   powerUpDropChance: 0.14,
+  powerUpSize: 38,
   bossWaveInterval: 5,
 });
 const LEVELS = Object.freeze([
@@ -147,6 +148,12 @@ function setup() {
   textFont(assets.font);
   masterVolume(0.05);
   state.highScore = loadHighScore();
+
+  // These source images are 318px square. Drawing and rotating them at 12%
+  // scale made the canvas resample every power-up on every frame.
+  Object.keys(assets.images.powerUps).forEach((key) => {
+    assets.images.powerUps[key].resize(GAME.powerUpSize, GAME.powerUpSize);
+  });
 
   groups.stars = new Group();
   groups.bullets = new Group();
@@ -524,8 +531,7 @@ function createPowerUp(x, y) {
   const powerUp = createSprite(x, y, 24, 24);
   powerUp.powerUpType = type.name;
   powerUp.addImage(type.image);
-  powerUp.scale = 0.12;
-  powerUp.setCollider("circle", 0, 0, 140);
+  powerUp.setCollider("circle", 0, 0, GAME.powerUpSize * 0.44);
   powerUp.rotationSpeed = 4;
   const fallSpeed = 3;
   powerUp.setSpeed(fallSpeed, 90);
