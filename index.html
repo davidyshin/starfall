@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="Starfall, a fast-paced arcade shooter built with p5.js.">
-    <meta name="application-version" content="1.1.3">
+    <meta name="application-version" content="1.1.4">
     <title>Starfall</title>
     <link rel="icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="style.css">
@@ -17,7 +17,9 @@
     <div class="orientation-notice" role="status">
       <span class="rotate-icon" aria-hidden="true">↻</span>
       <strong>Rotate to landscape</strong>
-      <span>Starfall requires a wider flight deck.</span>
+      <span class="orientation-copy">Starfall requires a wider flight deck.</span>
+      <button class="orientation-button" id="orientation-button" type="button">Try landscape</button>
+      <span class="orientation-status" id="orientation-status" aria-live="polite"></span>
     </div>
     <button class="guide-toggle" id="guide-toggle" type="button">Guide</button>
     <div class="game-layout">

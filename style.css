@@ -388,20 +388,20 @@ canvas {
 }
 
 .touch-device .touch-controls [data-control="left"] {
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 3rem);
     left: max(0.75rem, env(safe-area-inset-left));
     font-size: 1.3rem;
 }
 
 .touch-device .touch-controls [data-control="right"] {
     right: max(0.75rem, env(safe-area-inset-right));
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 3rem);
     font-size: 1.3rem;
 }
 
 .touch-device .touch-controls [data-control="special"] {
     right: max(0.75rem, env(safe-area-inset-right));
-    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 5.25rem);
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 8.25rem);
 }
 
 .touch-device .touch-controls [data-control="special"]:active {
@@ -417,11 +417,15 @@ canvas {
 
 .touch-device:not(.portrait-mode) body {
     place-content: start center;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
     padding:
       max(0.35rem, env(safe-area-inset-top))
       max(0.5rem, env(safe-area-inset-right))
       max(0.35rem, env(safe-area-inset-bottom))
       max(0.5rem, env(safe-area-inset-left));
+    overflow: hidden;
 }
 
 .touch-device:not(.portrait-mode) canvas {
@@ -476,10 +480,34 @@ canvas {
     line-height: 1.7;
 }
 
-.touch-device.portrait-mode .orientation-notice span:last-child {
+.touch-device.portrait-mode .orientation-copy {
     max-width: 24rem;
     color: #879da0;
     font-size: 0.52rem;
+    line-height: 1.8;
+}
+
+.orientation-button {
+    padding: 0.75rem 1rem;
+    border: 2px solid #315b65;
+    border-radius: 0;
+    color: #a9e4e1;
+    font-family: "Starfall Pixel", monospace;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    background: #050b0d;
+    box-shadow: 3px 3px 0 #102a31;
+}
+
+.orientation-status:empty {
+    display: none;
+}
+
+.touch-device.portrait-mode .orientation-status {
+    max-width: 24rem;
+    color: #879da0;
+    font-family: "Starfall Pixel", monospace;
+    font-size: 0.45rem;
     line-height: 1.8;
 }
 
