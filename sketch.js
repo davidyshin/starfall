@@ -74,6 +74,7 @@ let guidePaused = false;
 const state = {
   screen: SCREEN.START,
   paused: false,
+  pausedAt: 0,
   muted: false,
   score: 0,
   highScore: 0,
@@ -1206,6 +1207,7 @@ function resetGame() {
   removeGroupSprites(groups.enemyBullets);
   state.screen = SCREEN.PLAYING;
   state.paused = false;
+  state.pausedAt = 0;
   state.score = 0;
   state.health = GAME.maxHealth;
   state.levelIndex = 0;
@@ -1419,16 +1421,45 @@ function togglePause() {
 }
 
 function setPaused(isPaused) {
+  if (state.paused === isPaused) return;
   state.paused = isPaused;
   assets.sounds.pause.play();
   if (state.paused) {
+    state.pausedAt = millis();
     assets.sounds.gameMusic.pause();
     noLoop();
     redraw();
   } else {
+    shiftGameplayTimers(millis() - state.pausedAt);
+    state.pausedAt = 0;
     assets.sounds.gameMusic.loop();
     loop();
   }
+}
+
+function shiftGameplayTimers(pauseDuration) {
+  const shift = (deadline) =>
+    deadline > 0 && Number.isFinite(deadline)
+      ? deadline + pauseDuration
+      : deadline;
+
+  state.nextShotAt = shift(state.nextShotAt);
+  state.waveNoticeUntil = shift(state.waveNoticeUntil);
+  state.shakeUntil = shift(state.shakeUntil);
+  state.flashUntil = shift(state.flashUntil);
+  state.powerUps.spreadBurstUntil = shift(state.powerUps.spreadBurstUntil);
+  state.powerUps.nextSpreadChargeAt = shift(
+    state.powerUps.nextSpreadChargeAt
+  );
+  state.powerUps.slowTimeUntil = shift(state.powerUps.slowTimeUntil);
+
+  groups.bosses.forEach((boss) => {
+    boss.nextDamageAt = shift(boss.nextDamageAt);
+    boss.nextShotAt = shift(boss.nextShotAt);
+    boss.nextBurstAt = shift(boss.nextBurstAt);
+    boss.burstUntil = shift(boss.burstUntil);
+    boss.burstVolleyAt = shift(boss.burstVolleyAt);
+  });
 }
 
 function drawPauseOverlay() {

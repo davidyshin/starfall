@@ -413,6 +413,12 @@ canvas {
     display: none;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .fullscreen-toggle {
+    display: none;
+  }
+}
+
 .touch-device .game-guide {
     position: fixed;
     inset: 0;
@@ -479,8 +485,10 @@ canvas {
 .touch-device .touch-controls [data-control="overdrive"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 13.5rem);
+    width: 6rem;
     border-color: #315b65;
     color: #8eefff;
+    font-size: 0.44rem;
 }
 
 .touch-device .touch-controls [data-control="special"]:active {
