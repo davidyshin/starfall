@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Starfall, a fast-paced arcade shooter built with p5.js.">
-    <meta name="application-version" content="1.1.7">
+    <meta name="application-version" content="1.1.8">
     <title>Starfall</title>
     <link rel="icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="style.css">
@@ -23,9 +23,10 @@
     <div class="game-layout">
       <main aria-label="Starfall game"></main>
       <nav class="touch-controls" aria-label="Touch game controls">
-        <button type="button" data-control="left" aria-label="Move left">←</button>
-        <button type="button" data-control="right" aria-label="Move right">→</button>
+        <button type="button" data-control="left" aria-label="Move left"></button>
+        <button type="button" data-control="right" aria-label="Move right"></button>
         <button type="button" data-control="special">Special</button>
+        <button type="button" data-control="spread">Triple</button>
         <button type="button" data-control="pause" aria-label="Pause or resume">P</button>
       </nav>
       <dialog class="game-guide" id="game-guide" aria-label="Game information">
@@ -52,28 +53,40 @@
                 <span class="mobile-control">Button at 100%</span>
               </dd>
             </div>
+            <div>
+              <dt>Triple shot</dt>
+              <dd>
+                <span class="desktop-control">X to toggle</span>
+                <span class="mobile-control">Toggle button</span>
+              </dd>
+            </div>
             <div><dt>Pause</dt><dd>P</dd></div>
             <div class="desktop-control-row"><dt>Mute</dt><dd>M</dd></div>
           </dl>
-          <p class="touch-hint">Use the corner arrows to move. Special sits above the right arrow.</p>
+          <p class="touch-hint">Use the corner arrows to move. Special and triple-shot controls sit above the right arrow.</p>
         </section>
         <section>
           <h2>Power-ups</h2>
           <ul class="power-up-list">
-            <li><strong>Blue · Rapid Fire</strong><span>Increases the firing rate.</span></li>
-            <li><strong>Red · Spread Shot</strong><span>Permanent triple shot. Falls fast.</span></li>
-            <li><strong>Yellow · Slow Time</strong><span>Falling stars move slower.</span></li>
-            <li><strong>Green · Shield</strong><span>Blocks the next three hits.</span></li>
+            <li>
+              <img src="assets/powerups-v4/rapid-fire.png" alt="Cyan lightning bolt">
+              <span class="power-up-copy"><strong>Rapid Fire</strong><span>Unlimited triple shot at maximum firing rate for 12 seconds.</span></span>
+            </li>
+            <li>
+              <img src="assets/powerups-v4/spread-shot.png" alt="Three magenta projectiles">
+              <span class="power-up-copy"><strong>Spread Reload</strong><span>Instantly refills triple-shot energy. Switch it off to recharge. Falls fast.</span></span>
+            </li>
+            <li>
+              <img src="assets/powerups-v4/slow-time.png" alt="Yellow clock">
+              <span class="power-up-copy"><strong>Slow Time</strong><span>Slows falling stars for 12 seconds.</span></span>
+            </li>
+            <li>
+              <img src="assets/powerups-v4/shield.png" alt="Green shield">
+              <span class="power-up-copy"><strong>Shield · 3 Blocks</strong><span>Rings show strength tiers; the HUD shows exact hits.</span></span>
+            </li>
           </ul>
         </section>
-        <section class="game-status" aria-live="polite">
-          <h2>Status</h2>
-          <ul class="active-effect-list" id="active-effects">
-            <li>No active power-ups</li>
-          </ul>
-          <p id="boss-status" hidden></p>
-        </section>
-        <p class="boss-tip"><strong>Boss waves:</strong> Shoot the giant ship. Its energy shots only hit your ship, but one hit ends the run.</p>
+        <p class="boss-tip"><strong>Boss waves:</strong> Shoot the giant spinning star. Its energy shots only hit your ship, but one hit ends the run.</p>
       </dialog>
     </div>
     <footer class="site-footer">

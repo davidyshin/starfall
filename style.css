@@ -47,6 +47,10 @@ body {
 
 .touch-controls {
   display: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .touch-controls button {
@@ -66,6 +70,10 @@ body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.touch-controls button::selection {
+  background: transparent;
 }
 
 .touch-controls button:active {
@@ -228,18 +236,32 @@ body {
 
 .power-up-list {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.35rem;
   padding: 0;
   list-style: none;
 }
 
 .power-up-list li {
   display: grid;
+  grid-template-columns: 1.65rem 1fr;
+  align-items: center;
   gap: 0.15rem;
-  padding: 0.45rem 0.55rem;
+  padding: 0.3rem 0.45rem;
   border-left: 2px solid #397a8a;
   border-radius: 0;
   background: #050b0d;
+}
+
+.power-up-list img {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+}
+
+.power-up-copy {
+  display: grid;
+  gap: 0.15rem;
 }
 
 .power-up-list li:nth-child(2) {
@@ -257,45 +279,20 @@ body {
 .power-up-list strong {
   color: #b5cbc9;
   font-family: "Starfall Pixel", monospace;
-  font-size: 0.5rem;
-  line-height: 1.7;
+  font-size: 0.45rem;
+  line-height: 1.5;
 }
 
-.power-up-list span,
-.boss-tip,
-.game-status {
+.power-up-list .power-up-copy > span {
+  color: #a4b2c1;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.boss-tip {
   color: #a4b2c1;
   font-size: 0.82rem;
   line-height: 1.4;
-}
-
-.active-effect-list {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0;
-  list-style: none;
-}
-
-.active-effect-list li {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #183144;
-  border-radius: 0;
-  color: #8dd2c9;
-  font-family: "Starfall Pixel", monospace;
-  font-size: 0.48rem;
-  line-height: 1.7;
-  background: #03090a;
-}
-
-#boss-status {
-  margin-top: 0.5rem;
-  padding-left: 0.5rem;
-  border-left: 3px solid #9b4f7c;
-  color: #c6699e;
-  font-family: "Starfall Pixel", monospace;
-  font-size: 0.48rem;
-  line-height: 1.7;
-  font-weight: 700;
 }
 
 @media (max-width: 720px) {
@@ -392,18 +389,39 @@ canvas {
 .touch-device .touch-controls [data-control="left"] {
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 3rem);
     left: max(0.75rem, env(safe-area-inset-left));
-    font-size: 1.3rem;
 }
 
 .touch-device .touch-controls [data-control="right"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 3rem);
-    font-size: 1.3rem;
+}
+
+.touch-device .touch-controls [data-control="left"]::before,
+.touch-device .touch-controls [data-control="right"]::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1rem;
+    height: 1rem;
+    border-bottom: 0.3rem solid currentColor;
+    border-left: 0.3rem solid currentColor;
+    transform: translate(-35%, -50%) rotate(45deg);
+    pointer-events: none;
+}
+
+.touch-device .touch-controls [data-control="right"]::before {
+    transform: translate(-65%, -50%) rotate(225deg);
 }
 
 .touch-device .touch-controls [data-control="special"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 8.25rem);
+}
+
+.touch-device .touch-controls [data-control="spread"] {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 13.5rem);
 }
 
 .touch-device .touch-controls [data-control="special"]:active {

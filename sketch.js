@@ -1,19 +1,19 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.7";
+const VERSION = "1.1.8";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
   GAME_OVER: "game-over",
 });
 const STORAGE_KEYS = Object.freeze({ highScore: "starfall.highScore" });
-const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 90]);
+const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 88, 90]);
 const GAME = Object.freeze({
   frameRate: 40,
   maxHealth: 100,
-  baseStarCount: 16,
-  maxStarCount: 24,
+  baseStarCount: 18,
+  maxStarCount: 28,
   shipMinX: 50,
   shipMaxX: 750,
   shipAcceleration: 3.5,
@@ -24,9 +24,12 @@ const GAME = Object.freeze({
   maxSpecialCharge: 100,
   shotCooldownMs: 220,
   rapidShotCooldownMs: 80,
+  maxSpreadEnergy: 100,
+  spreadEnergyPerShot: 2,
+  spreadRechargePerSecond: 12,
   powerUpDurationMs: 12000,
-  powerUpDropChance: 0.14,
-  powerUpSize: 38,
+  powerUpDropChance: 0.09,
+  powerUpSize: 46,
   bossWaveInterval: 5,
 });
 const LEVELS = Object.freeze([
@@ -79,7 +82,9 @@ const state = {
   bossWaves: new Set(),
   powerUps: {
     rapidFireUntil: 0,
-    spreadShotUnlocked: false,
+    spreadShotUnlocked: true,
+    spreadShotActive: true,
+    spreadEnergy: GAME.maxSpreadEnergy,
     slowTimeUntil: 0,
     shieldHits: 0,
   },
@@ -97,10 +102,10 @@ function preload() {
     "assets/opengameart/projectiles/boss-laser.png"
   );
   assets.images.powerUps = {
-    rapidFire: loadImage("assets/opengameart/powerups/rapid-fire.png"),
-    spreadShot: loadImage("assets/opengameart/powerups/spread-shot.png"),
-    slowTime: loadImage("assets/opengameart/powerups/slow-time.png"),
-    shield: loadImage("assets/opengameart/powerups/shield.png"),
+    rapidFire: loadImage("assets/powerups-v4/rapid-fire.png"),
+    spreadShot: loadImage("assets/powerups-v4/spread-shot.png"),
+    slowTime: loadImage("assets/powerups-v4/slow-time.png"),
+    shield: loadImage("assets/powerups-v4/shield.png"),
   };
   assets.images.particles = [
     loadImage("assets/images/particle.png"),
@@ -173,9 +178,7 @@ function setup() {
   sprites.ship.setCollider("rectangle", 0, 2, 42, 28);
   sprites.base = createSprite(width / 2, height * 0.985, width, 20);
   sprites.base.setCollider("rectangle", 0, 0, width, 20);
-  sprites.healthBar = createSprite(width / 2, height * 0.013, width, 20);
   sprites.base.shapeColor = color(0);
-  updateHealthBar();
   assets.sounds.menuMusic.setLoop(true);
   assets.sounds.gameMusic.setLoop(true);
   assets.sounds.gameOverMusic.setLoop(true);
@@ -191,7 +194,6 @@ function setup() {
 }
 
 function draw() {
-  updateExternalUi();
   if (state.screen === SCREEN.START) {
     drawStartScreen();
     return;
@@ -235,11 +237,14 @@ function updateGame() {
   updateShip();
   updateStars();
   updateBosses();
+  updatePowerUps();
+  updateSpreadEnergy();
   removeOffscreenPlayerShots();
   if ((keyDown("space") || touchMode) && millis() >= state.nextShotAt) {
     shoot();
   }
   if (keyWentDown("z")) useSpecial();
+  if (keyWentDown("x")) toggleSpreadShot();
 
   groups.bullets.overlap(groups.stars, bulletHitStar);
   groups.bullets.overlap(groups.bosses, bulletHitBoss);
@@ -286,12 +291,117 @@ function drawHud() {
   setTextStyle(15, BOLD);
   text(`Starfall v${VERSION}`, width / 2, 45);
   setTextStyle(10, NORMAL);
-  text(`CITY HP: ${state.health}`, width / 2, 65);
-  text(`Score: ${state.score}`, 730, 55);
-  text(`Hi-Score: ${state.highScore}`, 730, 70);
+  push();
+  textAlign(RIGHT);
+  text(`Score: ${state.score}`, width - 18, 55);
+  text(`Hi-Score: ${state.highScore}`, width - 18, 70);
+  pop();
   text(`Level: ${state.levelIndex + 1}`, 70, 55);
   text(`Combo: x${comboMultiplier()} (${state.combo})`, 110, 70);
-  text(`Special: ${Math.floor(state.specialCharge)}%`, 110, 85);
+  drawHudMeter("CITY", state.health, GAME.maxHealth, width / 2, 62, 230, color(70, 255, 190), false, 11);
+  const specialReady = state.specialCharge >= GAME.maxSpecialCharge;
+  drawHudMeter(
+    specialReady ? "SPECIAL READY [Z]" : "SPECIAL [Z]",
+    state.specialCharge,
+    GAME.maxSpecialCharge,
+    110,
+    94,
+    160,
+    color(109, 188, 255),
+    specialReady
+  );
+  if (state.powerUps.spreadShotUnlocked) {
+    const rapidActive = millis() < state.powerUps.rapidFireUntil;
+    const spreadLabel = rapidActive
+      ? "TRIPLE UNLIMITED"
+      : state.powerUps.spreadShotActive
+        ? "TRIPLE ON [X]"
+        : state.powerUps.spreadEnergy > 0
+          ? "TRIPLE OFF [X]"
+          : "TRIPLE EMPTY";
+    drawHudMeter(
+      spreadLabel,
+      state.powerUps.spreadEnergy,
+      GAME.maxSpreadEnergy,
+      110,
+      125,
+      160,
+      color(255, 70, 185)
+    );
+  }
+  drawBossHealthBar();
+  drawActiveEffectHud();
+}
+
+function drawBossHealthBar() {
+  const boss = groups.bosses[0];
+  if (!boss) return;
+  const meterWidth = 260;
+  const meterHeight = 10;
+  const x = width / 2;
+  const y = 94;
+  push();
+  rectMode(CENTER);
+  noStroke();
+  fill(0, 190);
+  rect(x, y, meterWidth + 4, meterHeight + 4);
+  rectMode(CORNER);
+  fill(40, 20, 38, 230);
+  rect(x - meterWidth / 2, y - meterHeight / 2, meterWidth, meterHeight);
+  fill(255, 80, 180);
+  rect(
+    x - meterWidth / 2,
+    y - meterHeight / 2,
+    meterWidth * (Math.max(0, boss.health) / boss.maxHealth),
+    meterHeight
+  );
+  setTextStyle(8, BOLD);
+  text(`BOSS ${Math.max(0, boss.health)} / ${boss.maxHealth}`, x, y + 18);
+  pop();
+}
+
+function drawHudMeter(label, value, maximum, x, y, meterWidth, meterColor, pulse, height) {
+  const meterHeight = height || 8;
+  const pulseOn = pulse && Math.floor(millis() / 250) % 2 === 0;
+  push();
+  rectMode(CENTER);
+  noStroke();
+  fill(pulseOn ? color(255, 220) : color(0, 190));
+  rect(x, y, meterWidth + 4, meterHeight + 4);
+  rectMode(CORNER);
+  fill(25, 35, 42, 230);
+  rect(x - meterWidth / 2, y - meterHeight / 2, meterWidth, meterHeight);
+  fill(pulseOn ? color(255) : meterColor);
+  rect(x - meterWidth / 2, y - meterHeight / 2, meterWidth * (value / maximum), meterHeight);
+  setTextStyle(8, BOLD);
+  if (pulseOn) fill(255, 245, 145);
+  text(`${label} ${Math.floor(value)}%`, x, y + 17);
+  pop();
+}
+
+function drawActiveEffectHud() {
+  const effects = getActivePowerUpNames();
+  if (effects.length === 0) return;
+  const panelX = width - 245;
+  const panelY = 84;
+  const panelWidth = 225;
+  const panelHeight = 25 + effects.length * 15;
+  push();
+  rectMode(CORNER);
+  fill(3, 9, 10, 125);
+  stroke(49, 91, 101);
+  strokeWeight(1.5);
+  rect(panelX, panelY, panelWidth, panelHeight);
+  noStroke();
+  setTextStyle(8, BOLD);
+  textAlign(LEFT);
+  fill(134, 208, 214);
+  text("STATUS", panelX + 9, panelY + 13);
+  effects.forEach((effect, index) => {
+    fill(190, 245, 235);
+    text(effect, panelX + 9, panelY + 29 + index * 15);
+  });
+  pop();
 }
 
 function updateShip() {
@@ -327,14 +437,22 @@ function updateShip() {
 }
 
 function shoot() {
-  const spreadActive = state.powerUps.spreadShotUnlocked;
+  const rapidActive = millis() < state.powerUps.rapidFireUntil;
+  const spreadActive =
+    rapidActive ||
+    (state.powerUps.spreadShotUnlocked && state.powerUps.spreadShotActive);
   const angles = spreadActive ? [255, 270, 285] : [270];
   angles.forEach((angle) => createBullet(angle));
-  state.nextShotAt =
-    millis() +
-    (millis() < state.powerUps.rapidFireUntil
-      ? GAME.rapidShotCooldownMs
-      : GAME.shotCooldownMs);
+  if (spreadActive && !rapidActive) {
+    state.powerUps.spreadEnergy = Math.max(
+      0,
+      state.powerUps.spreadEnergy - GAME.spreadEnergyPerShot
+    );
+    if (state.powerUps.spreadEnergy === 0) state.powerUps.spreadShotActive = false;
+  }
+  let cooldown = GAME.shotCooldownMs;
+  if (rapidActive) cooldown = GAME.rapidShotCooldownMs;
+  state.nextShotAt = millis() + cooldown;
   assets.sounds.bullet.setVolume(0.3);
   assets.sounds.bullet.play();
 }
@@ -386,8 +504,9 @@ function createStar() {
   star.starType = type.name;
   star.health = type.health;
   star.points = type.points;
-  star.baseSpeed = getLevelConfig(state.levelIndex).gravity * type.speedMultiplier;
+  star.baseSpeed = getStarGravity(state.levelIndex) * type.speedMultiplier;
   star.addAnimation(type.name, assets.animations[type.animation]);
+  star.scale = type.sizeScale;
   star.setCollider("circle", 0, 0, 21);
   star.setSpeed(star.baseSpeed, 90);
   star.rotationSpeed = 2.5;
@@ -403,6 +522,7 @@ function chooseStarType() {
       health: 2,
       points: 5,
       speedMultiplier: 1.1,
+      sizeScale: 1.25,
     };
   }
   if (state.levelIndex >= 4 && roll < 0.28) {
@@ -412,6 +532,7 @@ function chooseStarType() {
       health: 3,
       points: 4,
       speedMultiplier: 0.72,
+      sizeScale: 1.45,
     };
   }
   if (state.levelIndex >= 1 && roll < 0.48) {
@@ -421,6 +542,7 @@ function chooseStarType() {
       health: 1,
       points: 2,
       speedMultiplier: 1.55,
+      sizeScale: 1.1,
     };
   }
   return {
@@ -429,6 +551,7 @@ function chooseStarType() {
     health: 1,
     points: 1,
     speedMultiplier: 1,
+    sizeScale: 0.9,
   };
 }
 
@@ -463,7 +586,6 @@ function createHeart() {
 
 function collectHeart(heart) {
   state.health = GAME.maxHealth;
-  updateHealthBar();
   assets.sounds.life.play();
   heart.remove();
 }
@@ -475,7 +597,6 @@ function starHitBase(star) {
     state.health = Math.max(0, state.health - 8);
   }
   state.combo = 0;
-  updateHealthBar();
   assets.sounds.baseHit.play();
   createParticles(star.position.x, star.position.y + 20, 35, true);
   triggerImpactEffects();
@@ -525,9 +646,7 @@ function createPowerUp(x, y) {
   if (groups.powerUps.length >= 3) return;
   const types = [
     { name: "Rapid Fire", image: assets.images.powerUps.rapidFire },
-    ...(!state.powerUps.spreadShotUnlocked
-      ? [{ name: "Spread Shot", image: assets.images.powerUps.spreadShot, fallSpeed: 10 }]
-      : []),
+    { name: "Spread Shot", image: assets.images.powerUps.spreadShot, fallSpeed: 10 },
     { name: "Slow Time", image: assets.images.powerUps.slowTime },
     { name: "Shield", image: assets.images.powerUps.shield },
   ];
@@ -537,21 +656,52 @@ function createPowerUp(x, y) {
   powerUp.powerUpType = type.name;
   powerUp.addImage(type.image);
   powerUp.setCollider("circle", 0, 0, GAME.powerUpSize * 0.44);
-  powerUp.rotationSpeed = 4;
+  powerUp.pulseOffset = random(TWO_PI);
   const fallSpeed = type.fallSpeed || 3;
   powerUp.setSpeed(fallSpeed, 90);
   powerUp.life = Math.ceil((height - y + 100) / fallSpeed);
   groups.powerUps.add(powerUp);
 }
 
+function updatePowerUps() {
+  groups.powerUps.forEach((powerUp) => {
+    powerUp.scale = 0.96 + Math.sin(frameCount * 0.12 + powerUp.pulseOffset) * 0.06;
+  });
+}
+
 function collectPowerUp(powerUp) {
   const expiresAt = millis() + GAME.powerUpDurationMs;
   if (powerUp.powerUpType === "Rapid Fire") state.powerUps.rapidFireUntil = expiresAt;
-  if (powerUp.powerUpType === "Spread Shot") state.powerUps.spreadShotUnlocked = true;
+  if (powerUp.powerUpType === "Spread Shot") {
+    state.powerUps.spreadShotUnlocked = true;
+    state.powerUps.spreadShotActive = true;
+    state.powerUps.spreadEnergy = GAME.maxSpreadEnergy;
+  }
   if (powerUp.powerUpType === "Slow Time") state.powerUps.slowTimeUntil = expiresAt;
   if (powerUp.powerUpType === "Shield") state.powerUps.shieldHits += 3;
   assets.sounds.life.play();
   powerUp.remove();
+}
+
+function toggleSpreadShot() {
+  if (state.powerUps.spreadShotActive) {
+    state.powerUps.spreadShotActive = false;
+    return;
+  }
+  if (state.powerUps.spreadEnergy > 0) state.powerUps.spreadShotActive = true;
+}
+
+function updateSpreadEnergy() {
+  if (
+    state.powerUps.spreadShotActive ||
+    state.powerUps.spreadEnergy >= GAME.maxSpreadEnergy
+  ) {
+    return;
+  }
+  state.powerUps.spreadEnergy = Math.min(
+    GAME.maxSpreadEnergy,
+    state.powerUps.spreadEnergy + GAME.spreadRechargePerSecond / GAME.frameRate
+  );
 }
 
 function getActivePowerUpNames() {
@@ -559,7 +709,6 @@ function getActivePowerUpNames() {
   if (millis() < state.powerUps.rapidFireUntil) {
     names.push(`RAPID FIRE ${secondsRemaining(state.powerUps.rapidFireUntil)}s`);
   }
-  if (state.powerUps.spreadShotUnlocked) names.push("SPREAD SHOT PERMANENT");
   if (millis() < state.powerUps.slowTimeUntil) {
     names.push(`SLOW TIME ${secondsRemaining(state.powerUps.slowTimeUntil)}s`);
   }
@@ -573,11 +722,14 @@ function secondsRemaining(expiresAt) {
 
 function drawShieldIndicator() {
   if (state.powerUps.shieldHits <= 0) return;
+  const strengthRings = Math.min(4, Math.ceil(state.powerUps.shieldHits / 3));
   push();
   noFill();
   stroke(70, 255, 190, 210);
-  strokeWeight(4);
-  arc(width / 2, height - 2, width - 10, 100, PI, TWO_PI);
+  for (let ring = 0; ring < strengthRings; ring += 1) {
+    strokeWeight(2.5);
+    arc(width / 2, height - 2, width - 10 - ring * 14, 100 + ring * 12, PI, TWO_PI);
+  }
   noStroke();
   setTextStyle(9, BOLD);
   fill(70, 255, 190);
@@ -607,8 +759,8 @@ function updateLevel() {
   while (state.score >= getLevelConfig(nextLevelIndex).score) {
     state.levelIndex = nextLevelIndex;
     groups.stars.forEach((star) => {
-      const previousGravity = getLevelConfig(state.levelIndex - 1).gravity;
-      const currentGravity = getLevelConfig(state.levelIndex).gravity;
+      const previousGravity = getStarGravity(state.levelIndex - 1);
+      const currentGravity = getStarGravity(state.levelIndex);
       star.baseSpeed *= currentGravity / previousGravity;
     });
     createHeart();
@@ -639,16 +791,24 @@ function getLevelConfig(levelIndex) {
   };
 }
 
+function getStarGravity(levelIndex) {
+  const startingGravity = LEVELS[0].gravity;
+  const configuredGravity = getLevelConfig(levelIndex).gravity;
+  return (startingGravity + (configuredGravity - startingGravity) * 0.9) * 1.05;
+}
+
 function createBoss(wave) {
   removeGroupSprites(groups.stars);
-  const boss = createSprite(width / 2, -80, 150, 64);
-  boss.addImage(assets.images.boss);
-  boss.scale = 1.8;
-  boss.setCollider("rectangle", 0, 0, 68, 46);
-  boss.health = 18 + wave * 3;
+  const boss = createSprite(width / 2, -90, 160, 160);
+  boss.addAnimation("bossStar", assets.animations.redStar);
+  boss.scale = 3.2;
+  boss.rotationSpeed = -1.2;
+  boss.setCollider("circle", 0, 0, 23);
+  boss.health = 50 + wave * 6;
   boss.maxHealth = boss.health;
   boss.points = wave * 20;
   boss.phase = 0;
+  boss.nextDamageAt = 0;
   boss.nextShotAt = millis() + 1250;
   boss.setSpeed(1.8, 90);
   groups.bosses.add(boss);
@@ -681,11 +841,14 @@ function createEnemyBullet(x, y) {
 function bulletHitBoss(bullet, boss) {
   if (bullet.removed || boss.removed || boss.destroyed) return;
   bullet.remove();
+  if (millis() < boss.nextDamageAt) return;
+  boss.nextDamageAt = millis() + 65;
   damageBoss(boss, 1, true);
 }
 
-function specialHitBoss(_special, boss) {
-  if (boss.removed || boss.destroyed) return;
+function specialHitBoss(special, boss) {
+  if (special.bossHit || boss.removed || boss.destroyed) return;
+  special.bossHit = true;
   damageBoss(boss, 8, false);
 }
 
@@ -724,17 +887,6 @@ function drawWaveAnnouncement() {
     text("BOSS INCOMING", width / 2, height / 2 + 10);
   }
   pop();
-}
-
-function updateHealthBar() {
-  sprites.healthBar.width = (state.health / GAME.maxHealth) * width;
-  if (state.health <= 30) {
-    sprites.healthBar.shapeColor = color(247, 10, 10);
-  } else if (state.health <= 50) {
-    sprites.healthBar.shapeColor = color(255, 156, 0);
-  } else {
-    sprites.healthBar.shapeColor = color(0, 253, 47);
-  }
 }
 
 function endGame() {
@@ -794,12 +946,13 @@ function resetGame() {
   state.waveNoticeUntil = millis() + 1800;
   state.bossWaves = new Set();
   state.powerUps.rapidFireUntil = 0;
-  state.powerUps.spreadShotUnlocked = false;
+  state.powerUps.spreadShotUnlocked = true;
+  state.powerUps.spreadShotActive = true;
+  state.powerUps.spreadEnergy = GAME.maxSpreadEnergy;
   state.powerUps.slowTimeUntil = 0;
   state.powerUps.shieldHits = 0;
   sprites.ship.position.x = width / 2;
   sprites.ship.velocity.x = 0;
-  updateHealthBar();
   assets.sounds.gameOverMusic.stop();
   assets.sounds.gameMusic.loop();
 }
@@ -819,41 +972,26 @@ function setTextStyle(size, style) {
   fill(255);
 }
 
-function updateExternalUi() {
-  const activeEffects = document.getElementById("active-effects");
-  const bossStatus = document.getElementById("boss-status");
-  if (!activeEffects || !bossStatus) return;
-
-  const activePowerUps = getActivePowerUpNames();
-  const effects = activePowerUps.length > 0 ? activePowerUps : ["No active power-ups"];
-  const signature = effects.join("|");
-  if (activeEffects.dataset.signature !== signature) {
-    activeEffects.replaceChildren(
-      ...effects.map((effect) => {
-        const item = document.createElement("li");
-        item.textContent = effect;
-        return item;
-      })
-    );
-    activeEffects.dataset.signature = signature;
-  }
-
-  const boss = groups.bosses[0];
-  bossStatus.hidden = !boss;
-  bossStatus.textContent = boss
-    ? `Boss HP: ${Math.max(0, boss.health)} / ${boss.maxHealth}`
-    : "";
-}
-
 function bindTouchControls(canvasElement) {
   const controls = document.querySelector(".touch-controls");
   controls.addEventListener("contextmenu", (event) => event.preventDefault());
   controls.addEventListener("dblclick", (event) => event.preventDefault());
+  controls.addEventListener("selectstart", (event) => event.preventDefault());
+  controls.addEventListener("dragstart", (event) => event.preventDefault());
   canvasElement.addEventListener("dblclick", (event) => event.preventDefault());
   document.addEventListener("gesturestart", (event) => event.preventDefault());
 
   controls.querySelectorAll("[data-control]").forEach((button) => {
     const control = button.dataset.control;
+
+    // iOS Safari can start its text loupe before pointerdown suppression takes
+    // effect, so cancel the native touch gesture at its earliest event too.
+    button.addEventListener("touchstart", (event) => event.preventDefault(), {
+      passive: false,
+    });
+    button.addEventListener("touchmove", (event) => event.preventDefault(), {
+      passive: false,
+    });
 
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -863,6 +1001,7 @@ function bindTouchControls(canvasElement) {
         touchControls[control] = true;
       }
       if (state.screen === SCREEN.PLAYING && control === "special") useSpecial();
+      if (state.screen === SCREEN.PLAYING && control === "spread") toggleSpreadShot();
       if (control === "pause" && state.screen === SCREEN.PLAYING) togglePause();
     });
 
