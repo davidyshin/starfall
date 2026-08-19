@@ -410,7 +410,7 @@ canvas {
 }
 
 .touch-device .fullscreen-toggle {
-    right: calc(max(0.75rem, env(safe-area-inset-right)) + 4.75rem);
+    display: none;
 }
 
 .touch-device .game-guide {

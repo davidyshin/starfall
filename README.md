@@ -38,7 +38,7 @@ The game uses vendored p5.js, p5.sound, and p5.play builds, so no package instal
 - <kbd>P</kbd>: pause or resume
 - <kbd>M</kbd>: mute or unmute
 
-On mobile, rotate to landscape. Firing is automatic; use the corner arrows to move and the on-screen buttons for Nova, Overdrive, pause, and the guide.
+On mobile, rotate to landscape. Firing is automatic; use the corner arrows to move and the on-screen buttons for Nova, Overdrive, pause, and the guide. Fullscreen controls are desktop-only.
 
 Your high score is saved in the browser.
 
