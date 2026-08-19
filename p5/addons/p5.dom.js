@@ -289,7 +289,7 @@
     var method = 'create' + tag.charAt(0).toUpperCase() + tag.slice(1);
     p5.prototype[method] = function(html) {
       var elt = document.createElement(tag);
-      elt.innerHTML = typeof html === undefined ? "" : html;
+      elt.textContent = typeof html === 'undefined' ? "" : html;
       return addElement(elt, this);
     }
   });
@@ -1139,7 +1139,11 @@
    * @return {Object|p5.Element}
    */
   p5.Element.prototype.removeClass = function(c) {
-    var regex = new RegExp('(?:^|\\s)'+c+'(?!\\S)');
+    this.elt.classList.remove(c);
+    return this;
+  };
+  // Unused legacy regex kept for reference:
+  p5.Element.prototype._removeLegacy = function(c) {
     this.elt.className = this.elt.className.replace(regex, '');
     this.elt.className = this.elt.className.replace(/^\s+|\s+$/g, ""); //prettify (optional)
     return this;
