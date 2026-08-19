@@ -30,7 +30,7 @@ const GAME = Object.freeze({
   shotCooldownMs: 220,
   rapidShotCooldownMs: 80,
   maxSpreadEnergy: 100,
-  spreadActivationThreshold: 25,
+  spreadReactivationThreshold: 50,
   spreadRechargePerSecond: 3.5,
   spreadDrainPerSecond: 9.1,
   powerUpDurationMs: 12000,
@@ -330,7 +330,7 @@ function drawHud() {
       ? "TRIPLE UNLIMITED"
       : state.powerUps.spreadShotActive
         ? "TRIPLE ACTIVE"
-        : `TRIPLE CHARGING TO ${GAME.spreadActivationThreshold}%`;
+        : `TRIPLE CHARGING TO ${GAME.spreadReactivationThreshold}%`;
     drawHudMeter(
       spreadLabel,
       state.powerUps.spreadEnergy,
@@ -498,7 +498,7 @@ function shoot() {
   const spreadActive =
     rapidActive ||
     (state.powerUps.spreadShotUnlocked && state.powerUps.spreadShotActive);
-  const angles = spreadActive ? [255, 270, 285] : [270];
+  const angles = spreadActive ? [260, 270, 280] : [270];
   angles.forEach((angle) => createBullet(angle, !spreadActive));
   let cooldown = GAME.shotCooldownMs;
   if (rapidActive) cooldown = GAME.rapidShotCooldownMs;
@@ -524,6 +524,7 @@ function createBullet(angle, isSingleShot) {
     isSingleShot ? 14 : 7,
     isSingleShot ? 20 : 17
   );
+  bullet.damage = isSingleShot ? 2 : 1;
   bullet.setSpeed(10, angle);
   bullet.life = 70;
   groups.bullets.add(bullet);
@@ -742,7 +743,7 @@ function starHitBase(star) {
 function bulletHitStar(bullet, star) {
   if (bullet.removed || star.removed || star.destroyed) return;
   bullet.remove();
-  star.health -= 1;
+  star.health -= bullet.damage || 1;
   if (star.health <= 0) destroyStar(star, true);
   else createParticles(star.position.x, star.position.y, 5, false);
 }
@@ -833,12 +834,15 @@ function updateSpreadEnergy() {
     0,
     GAME.maxSpreadEnergy
   );
-  if (state.powerUps.spreadEnergy === 0) {
+  if (
+    state.powerUps.spreadShotActive &&
+    state.powerUps.spreadEnergy === 0
+  ) {
     state.powerUps.spreadShotActive = false;
   }
   if (
     !state.powerUps.spreadShotActive &&
-    state.powerUps.spreadEnergy >= GAME.spreadActivationThreshold
+    state.powerUps.spreadEnergy >= GAME.spreadReactivationThreshold
   ) {
     state.powerUps.spreadShotActive = true;
   }
@@ -947,6 +951,11 @@ function createBoss(wave) {
   boss.health = 50 + wave * 6;
   boss.maxHealth = boss.health;
   boss.points = wave * 20;
+  boss.difficulty = Math.min(
+    6,
+    Math.max(0, Math.floor(wave / GAME.bossWaveInterval) - 1)
+  );
+  boss.projectileSpeed = Math.min(7.2, 6 + boss.difficulty * 0.2);
   boss.phase = 0;
   boss.nextDamageAt = 0;
   boss.nextShotAt = millis() + 1250;
@@ -954,7 +963,7 @@ function createBoss(wave) {
   boss.burstUntil = 0;
   boss.burstVolleyAt = 0;
   boss.attackPhase = 1;
-  boss.setSpeed(1.8, 90);
+  boss.setSpeed(1.8 + boss.difficulty * 0.08, 90);
   groups.bosses.add(boss);
 }
 
@@ -970,9 +979,13 @@ function updateBosses() {
       state.flashUntil = now + 120;
     }
     if (boss.attackPhase >= 2 && now >= boss.nextBurstAt) {
-      boss.burstUntil = now + GAME.bossBurstDurationMs;
+      const burstDuration =
+        GAME.bossBurstDurationMs + boss.difficulty * 70;
+      boss.burstUntil = now + burstDuration;
       const burstCooldown =
-        boss.attackPhase === 3 ? 4000 : GAME.bossBurstCooldownMs;
+        boss.attackPhase === 3
+          ? Math.max(3000, 4000 - boss.difficulty * 150)
+          : Math.max(5500, GAME.bossBurstCooldownMs - boss.difficulty * 300);
       boss.nextBurstAt = boss.burstUntil + burstCooldown;
       boss.nextShotAt = now;
       state.flashUntil = now + 100;
@@ -991,15 +1004,20 @@ function updateBosses() {
       boss.velocity.y = 0;
       boss.phase += burstActive
         ? boss.attackPhase === 3
-          ? 0.08
-          : 0.065
-        : 0.025;
+          ? 0.08 + boss.difficulty * 0.004
+          : 0.065 + boss.difficulty * 0.003
+        : 0.025 + boss.difficulty * 0.0015;
       boss.position.x = width / 2 + Math.sin(boss.phase) * 260;
     }
     if (burstActive) {
       if (boss.burstVolleyAt && now >= boss.burstVolleyAt) {
         [76, 90, 104].forEach((angle) => {
-          createEnemyBullet(boss.position.x, boss.position.y + 35, angle);
+          createEnemyBullet(
+            boss.position.x,
+            boss.position.y + 35,
+            angle,
+            boss.projectileSpeed
+          );
         });
         boss.burstVolleyAt = 0;
       }
@@ -1007,21 +1025,31 @@ function updateBosses() {
         boss.burstVolleyAt = now + 280;
         boss.nextShotAt =
           now +
-          (boss.attackPhase === 3 ? 400 : GAME.bossBurstShotCooldownMs);
+          (boss.attackPhase === 3
+            ? Math.max(320, 400 - boss.difficulty * 14)
+            : Math.max(
+                410,
+                GAME.bossBurstShotCooldownMs - boss.difficulty * 18
+              ));
       }
     } else if (now >= boss.nextShotAt) {
-      createEnemyBullet(boss.position.x, boss.position.y + 35, 90);
-      boss.nextShotAt = now + 1100;
+      createEnemyBullet(
+        boss.position.x,
+        boss.position.y + 35,
+        90,
+        boss.projectileSpeed
+      );
+      boss.nextShotAt = now + Math.max(850, 1100 - boss.difficulty * 40);
     }
   });
 }
 
-function createEnemyBullet(x, y, angle = 90) {
+function createEnemyBullet(x, y, angle = 90, speed = 6) {
   const projectile = createSprite(x, y, 12, 18);
   projectile.addImage(assets.images.bossLaser);
   projectile.scale = 0.5;
   projectile.setCollider("rectangle", 0, 0, 22, 44);
-  projectile.setSpeed(6, angle);
+  projectile.setSpeed(speed, angle);
   projectile.life = 100;
   groups.enemyBullets.add(projectile);
 }
@@ -1031,7 +1059,7 @@ function bulletHitBoss(bullet, boss) {
   bullet.remove();
   if (millis() < boss.nextDamageAt) return;
   boss.nextDamageAt = millis() + 65;
-  damageBoss(boss, 1, true);
+  damageBoss(boss, bullet.damage || 1, true);
 }
 
 function specialHitBoss(special, boss) {
