@@ -1,14 +1,14 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.10";
+const VERSION = "1.1.11";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
   GAME_OVER: "game-over",
 });
 const STORAGE_KEYS = Object.freeze({ highScore: "starfall.highScore" });
-const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 88, 90]);
+const CONTROL_KEY_CODES = new Set([32, 37, 39, 70, 77, 80, 88, 90]);
 const GAME = Object.freeze({
   frameRate: 40,
   maxHealth: 100,
@@ -202,6 +202,8 @@ function setup() {
   document.documentElement.classList.toggle("touch-device", touchMode);
   bindTouchControls(canvas.elt);
   bindGuideModal();
+  bindFullscreen();
+  bindMobileGestureGuards();
   bindOrientationHandling();
 }
 
@@ -990,7 +992,7 @@ function createBoss(wave) {
   boss.scale = 3.2;
   boss.rotationSpeed = -1.2;
   boss.setCollider("circle", 0, 0, 23);
-  boss.health = 50 + wave * 6;
+  boss.health = 80 + wave * 10;
   boss.maxHealth = boss.health;
   boss.points = wave * 20;
   boss.difficulty = Math.min(
@@ -1353,9 +1355,54 @@ function bindOrientationHandling() {
   handleOrientation();
 }
 
+function bindFullscreen() {
+  const button = document.getElementById("fullscreen-toggle");
+  const updateButton = () => {
+    const active = Boolean(document.fullscreenElement) ||
+      document.documentElement.classList.contains("fullscreen-mode");
+    button.textContent = active ? "Exit" : "Full";
+    button.setAttribute("aria-pressed", String(active));
+  };
+
+  button.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateButton);
+  updateButton();
+}
+
+async function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    await document.exitFullscreen();
+    return;
+  }
+  if (document.documentElement.requestFullscreen) {
+    try {
+      await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+      return;
+    } catch (_error) {
+      // Fall through to a viewport-filling mode when fullscreen is unavailable.
+    }
+  }
+  document.documentElement.classList.toggle("fullscreen-mode");
+  document.getElementById("fullscreen-toggle").textContent =
+    document.documentElement.classList.contains("fullscreen-mode") ? "Exit" : "Full";
+}
+
+function bindMobileGestureGuards() {
+  document.addEventListener("touchmove", (event) => {
+    if (touchMode && event.touches.length > 1) event.preventDefault();
+  }, { passive: false });
+  document.addEventListener("selectstart", (event) => {
+    if (touchMode) event.preventDefault();
+  });
+  document.addEventListener("dragstart", (event) => {
+    if (touchMode) event.preventDefault();
+  });
+}
+
 function keyPressed(event) {
   if (event && event.repeat) return false;
   if (keyCode === 77) toggleMute();
+  if (keyCode === 70) toggleFullscreen();
   if (keyCode === 80 && state.screen === SCREEN.PLAYING) togglePause();
   if (keyCode === 90 && state.screen === SCREEN.PLAYING) useSpecial();
   if (keyCode === 88 && state.screen === SCREEN.PLAYING) activateOverdrive();

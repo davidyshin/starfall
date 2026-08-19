@@ -1,6 +1,6 @@
 # Starfall
 
-**Current release: 1.1.10**
+**Current release: 1.1.11**
 
 [Play the live version](https://starfall.netlify.app)
 
@@ -34,6 +34,7 @@ The game uses vendored p5.js, p5.sound, and p5.play builds, so no package instal
 - <kbd>Space</kbd>: shoot
 - <kbd>Z</kbd>: use the special attack
 - <kbd>X</kbd>: activate an Overdrive charge
+- <kbd>F</kbd>: enter or exit fullscreen
 - <kbd>P</kbd>: pause or resume
 - <kbd>M</kbd>: mute or unmute
 

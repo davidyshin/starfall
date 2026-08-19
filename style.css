@@ -20,6 +20,15 @@ body {
   margin: 0;
 }
 
+.touch-device body {
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .game-layout {
   display: grid;
   place-items: center;
@@ -31,7 +40,8 @@ body {
   display: none;
 }
 
-.guide-toggle {
+.guide-toggle,
+.fullscreen-toggle {
   display: none;
   padding: 0.55rem 0.7rem;
   border: 2px solid #315b65;
@@ -43,6 +53,46 @@ body {
   background: #050b0d;
   box-shadow: 3px 3px 0 #102a31;
   cursor: pointer;
+}
+
+.fullscreen-toggle {
+  position: fixed;
+  z-index: 30;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+  display: block;
+}
+
+:fullscreen body,
+html.fullscreen-mode body {
+  min-height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+}
+
+:fullscreen .game-layout,
+html.fullscreen-mode .game-layout {
+  width: 100vw;
+  height: 100dvh;
+}
+
+:fullscreen canvas,
+html.fullscreen-mode canvas {
+  width: min(100vw, 133.333333dvh) !important;
+  max-width: none;
+  height: min(100dvh, 75vw) !important;
+}
+
+:fullscreen .site-footer,
+html.fullscreen-mode .site-footer {
+  display: none;
+}
+
+:fullscreen .game-guide,
+:fullscreen .guide-toggle,
+html.fullscreen-mode .game-guide,
+html.fullscreen-mode .guide-toggle {
+  display: none !important;
 }
 
 .touch-controls {
@@ -357,6 +407,10 @@ canvas {
     top: max(0.75rem, env(safe-area-inset-top));
     right: max(0.75rem, env(safe-area-inset-right));
     display: block;
+}
+
+.touch-device .fullscreen-toggle {
+    right: calc(max(0.75rem, env(safe-area-inset-right)) + 4.75rem);
 }
 
 .touch-device .game-guide {
