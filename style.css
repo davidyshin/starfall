@@ -422,6 +422,13 @@ canvas {
     box-shadow: 3px 3px 0 #531c48;
 }
 
+.touch-device .touch-controls [data-control="overdrive"] {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 13.5rem);
+    border-color: #315b65;
+    color: #8eefff;
+}
+
 .touch-device .touch-controls [data-control="special"]:active {
     transform: translate(2px, 2px);
 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Starfall, a fast-paced arcade shooter built with p5.js.">
-    <meta name="application-version" content="1.1.9">
+    <meta name="application-version" content="1.1.10">
     <title>Starfall</title>
     <link rel="icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="style.css">
@@ -26,6 +26,7 @@
         <button type="button" data-control="left" aria-label="Move left"></button>
         <button type="button" data-control="right" aria-label="Move right"></button>
         <button type="button" data-control="special">Nova</button>
+        <button type="button" data-control="overdrive">Overdrive</button>
         <button type="button" data-control="pause" aria-label="Pause or resume">P</button>
       </nav>
       <dialog class="game-guide" id="game-guide" aria-label="Game information">
@@ -53,27 +54,23 @@
               </dd>
             </div>
             <div>
-              <dt>Triple shot</dt>
+              <dt>Overdrive</dt>
               <dd>
-                <span class="desktop-control">X to toggle</span>
-                <span class="mobile-control">Toggle button</span>
+                <span class="desktop-control">X to activate</span>
+                <span class="mobile-control">Overdrive button</span>
               </dd>
             </div>
             <div><dt>Pause</dt><dd>P</dd></div>
             <div class="desktop-control-row"><dt>Mute</dt><dd>M</dd></div>
           </dl>
-          <p class="touch-hint">Use the corner arrows to move. Nova sits above the right arrow.</p>
+          <p class="touch-hint">Use the corner arrows to move. Nova and Overdrive sit above the right arrow.</p>
         </section>
         <section>
           <h2>Power-ups</h2>
           <ul class="power-up-list">
             <li>
-              <img src="assets/powerups-v4/rapid-fire.png" alt="Cyan lightning bolt">
-              <span class="power-up-copy"><strong>Rapid Fire</strong><span>Unlimited triple shot at maximum firing rate for 12 seconds.</span></span>
-            </li>
-            <li>
               <img src="assets/powerups-v4/spread-shot.png" alt="Three magenta projectiles">
-              <span class="power-up-copy"><strong>Spread Reload</strong><span>Instantly refills triple-shot energy. Falls fast.</span></span>
+              <span class="power-up-copy"><strong>Overdrive Reload</strong><span>Restores all three rapid-fire triple-shot bursts. Falls fast.</span></span>
             </li>
             <li>
               <img src="assets/powerups-v4/slow-time.png" alt="Yellow clock">
@@ -81,7 +78,7 @@
             </li>
             <li>
               <img src="assets/powerups-v4/shield.png" alt="Green shield">
-              <span class="power-up-copy"><strong>Shield · 3 Blocks</strong><span>Rings show strength tiers; the HUD shows exact hits.</span></span>
+              <span class="power-up-copy"><strong>Shield · 2 Blocks</strong><span>Rings show strength tiers; the HUD shows exact hits.</span></span>
             </li>
           </ul>
         </section>

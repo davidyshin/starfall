@@ -1,6 +1,6 @@
 # Starfall
 
-**Current release: 1.1.9**
+**Current release: 1.1.10**
 
 [Play the live version](https://starfall.netlify.app)
 
@@ -33,10 +33,11 @@ The game uses vendored p5.js, p5.sound, and p5.play builds, so no package instal
 - <kbd>←</kbd> and <kbd>→</kbd>: move
 - <kbd>Space</kbd>: shoot
 - <kbd>Z</kbd>: use the special attack
+- <kbd>X</kbd>: activate an Overdrive charge
 - <kbd>P</kbd>: pause or resume
 - <kbd>M</kbd>: mute or unmute
 
-On mobile, rotate to landscape. Firing is automatic; use the corner arrows to move and the on-screen buttons for the special attack, pause, and guide.
+On mobile, rotate to landscape. Firing is automatic; use the corner arrows to move and the on-screen buttons for Nova, Overdrive, pause, and the guide.
 
 Your high score is saved in the browser.
 
@@ -44,7 +45,7 @@ Your high score is saved in the browser.
 
 - Consecutive hits build a combo multiplier of up to 5×. Taking a hit resets it.
 - Blue stars are fast, green stars are armored, and red stars weave as they fall.
-- Triple shot is available from the start and continuously recharges. Once depleted, it falls back to a larger, stronger single shot until the meter reaches 50%, then automatically reactivates with a tighter spread. Destroyed stars can occasionally drop an instant triple-shot refill, rapid fire, slow time, or a three-hit shield. Rapid fire grants unlimited triple shot for its duration while the meter continues recharging; each pickup has a unique animated silhouette as well as color, and timed effects appear in the in-game HUD.
+- Overdrive stores three burst charges activated with X. Each charge powers 12 seconds of combined rapid fire and triple shot, and one charge returns every 35 seconds. The leftmost empty HUD pip shows the cooldown until the next charge. Heart pickups restore city health only. Without Overdrive, firing uses the larger, stronger single shot. Destroyed stars can occasionally drop an instant three-charge Overdrive refill, slow time, or a two-hit shield; each pickup has a unique animated silhouette as well as color, and timed effects appear in the in-game HUD.
 - Hits charge the special meter; press <kbd>Z</kbd> when it reaches 100%.
 - Every fifth wave becomes a dedicated giant-star boss encounter with no regular stars. Bosses move and fire energy shots that only collide with the ship; one direct hit ends the run.
 - Screen shake, flashes, particles, and wave announcements provide combat feedback.

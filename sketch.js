@@ -1,14 +1,14 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.9";
+const VERSION = "1.1.10";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
   GAME_OVER: "game-over",
 });
 const STORAGE_KEYS = Object.freeze({ highScore: "starfall.highScore" });
-const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 90]);
+const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 88, 90]);
 const GAME = Object.freeze({
   frameRate: 40,
   maxHealth: 100,
@@ -27,12 +27,11 @@ const GAME = Object.freeze({
   specialChargePerBoss: 35,
   specialWidth: 330,
   specialBossDamage: 12,
-  shotCooldownMs: 220,
-  rapidShotCooldownMs: 80,
-  maxSpreadEnergy: 100,
-  spreadReactivationThreshold: 50,
-  spreadRechargePerSecond: 3.5,
-  spreadDrainPerSecond: 9.1,
+  shotCooldownMs: 190,
+  overdriveShotCooldownMs: 80,
+  maxSpreadCharges: 3,
+  spreadBurstDurationMs: 12000,
+  spreadPassiveRechargeMs: 35000,
   powerUpDurationMs: 12000,
   powerUpDropChance: 0.09,
   powerUpSize: 46,
@@ -90,10 +89,10 @@ const state = {
   flashUntil: 0,
   bossWaves: new Set(),
   powerUps: {
-    rapidFireUntil: 0,
     spreadShotUnlocked: true,
-    spreadShotActive: true,
-    spreadEnergy: GAME.maxSpreadEnergy,
+    spreadCharges: GAME.maxSpreadCharges,
+    spreadBurstUntil: 0,
+    nextSpreadChargeAt: 0,
     slowTimeUntil: 0,
     shieldHits: 0,
   },
@@ -111,7 +110,6 @@ function preload() {
     "assets/opengameart/projectiles/boss-laser.png"
   );
   assets.images.powerUps = {
-    rapidFire: loadImage("assets/powerups-v4/rapid-fire.png"),
     spreadShot: loadImage("assets/powerups-v4/spread-shot.png"),
     slowTime: loadImage("assets/powerups-v4/slow-time.png"),
     shield: loadImage("assets/powerups-v4/shield.png"),
@@ -252,7 +250,7 @@ function updateGame() {
   updateStars();
   updateBosses();
   updatePowerUps();
-  updateSpreadEnergy();
+  updateSpreadCharges();
   removeOffscreenPlayerShots();
   if ((keyDown("space") || touchMode) && millis() >= state.nextShotAt) {
     shoot();
@@ -325,21 +323,7 @@ function drawHud() {
     specialReady
   );
   if (state.powerUps.spreadShotUnlocked) {
-    const rapidActive = millis() < state.powerUps.rapidFireUntil;
-    const spreadLabel = rapidActive
-      ? "TRIPLE UNLIMITED"
-      : state.powerUps.spreadShotActive
-        ? "TRIPLE ACTIVE"
-        : `TRIPLE CHARGING TO ${GAME.spreadReactivationThreshold}%`;
-    drawHudMeter(
-      spreadLabel,
-      state.powerUps.spreadEnergy,
-      GAME.maxSpreadEnergy,
-      110,
-      125,
-      160,
-      color(255, 70, 185)
-    );
+    drawTripleChargePips(110, 125);
   }
   drawBossHealthBar();
   drawActiveEffectHud();
@@ -436,6 +420,46 @@ function drawHudMeter(label, value, maximum, x, y, meterWidth, meterColor, pulse
   pop();
 }
 
+function drawTripleChargePips(x, y) {
+  const pipWidth = 44;
+  const pipHeight = 9;
+  const gap = 8;
+  const totalWidth = GAME.maxSpreadCharges * pipWidth +
+    (GAME.maxSpreadCharges - 1) * gap;
+  const burstActive = millis() < state.powerUps.spreadBurstUntil;
+  push();
+  rectMode(CENTER);
+  noStroke();
+  for (let index = 0; index < GAME.maxSpreadCharges; index += 1) {
+    const pipX = x - totalWidth / 2 + pipWidth / 2 + index * (pipWidth + gap);
+    fill(0, 190);
+    rect(pipX, y, pipWidth + 4, pipHeight + 4);
+    const charged = index < state.powerUps.spreadCharges;
+    fill(charged ? color(255, 70, 185) : color(55, 35, 52, 230));
+    rect(pipX, y, pipWidth, pipHeight);
+    if (charged) {
+      fill(255, 185, 230, 170);
+      rect(pipX, y - 2, pipWidth - 8, 2);
+    } else if (
+      index === state.powerUps.spreadCharges &&
+      state.powerUps.nextSpreadChargeAt > 0
+    ) {
+      textAlign(CENTER);
+      textSize(6);
+      textStyle(BOLD);
+      fill(255, 150, 215);
+      text(`${secondsRemaining(state.powerUps.nextSpreadChargeAt)}s`, pipX, y + 2);
+    }
+  }
+  setTextStyle(8, BOLD);
+  if (burstActive) fill(255, 225, 245);
+  const label = burstActive
+    ? `OVERDRIVE ${secondsRemaining(state.powerUps.spreadBurstUntil)}s`
+    : `OVERDRIVE ${state.powerUps.spreadCharges} / ${GAME.maxSpreadCharges} [X]`;
+  text(label, x, y + 18);
+  pop();
+}
+
 function drawActiveEffectHud() {
   const effects = getActivePowerUpNames();
   if (effects.length === 0) return;
@@ -494,17 +518,31 @@ function updateShip() {
 }
 
 function shoot() {
-  const rapidActive = millis() < state.powerUps.rapidFireUntil;
+  const chargedBurstActive = millis() < state.powerUps.spreadBurstUntil;
   const spreadActive =
-    rapidActive ||
-    (state.powerUps.spreadShotUnlocked && state.powerUps.spreadShotActive);
-  const angles = spreadActive ? [260, 270, 280] : [270];
+    chargedBurstActive && state.powerUps.spreadShotUnlocked;
+  const angles = spreadActive ? [258, 270, 282] : [270];
   angles.forEach((angle) => createBullet(angle, !spreadActive));
   let cooldown = GAME.shotCooldownMs;
-  if (rapidActive) cooldown = GAME.rapidShotCooldownMs;
+  if (chargedBurstActive) cooldown = GAME.overdriveShotCooldownMs;
   state.nextShotAt = millis() + cooldown;
   assets.sounds.bullet.setVolume(0.3);
   assets.sounds.bullet.play();
+}
+
+function activateOverdrive() {
+  if (
+    state.powerUps.spreadCharges <= 0 ||
+    millis() < state.powerUps.spreadBurstUntil
+  ) {
+    return;
+  }
+  state.powerUps.spreadCharges -= 1;
+  state.powerUps.spreadBurstUntil = millis() + GAME.spreadBurstDurationMs;
+  if (state.powerUps.nextSpreadChargeAt === 0) {
+    state.powerUps.nextSpreadChargeAt =
+      millis() + GAME.spreadPassiveRechargeMs;
+  }
 }
 
 function createBullet(angle, isSingleShot) {
@@ -781,13 +819,22 @@ function comboMultiplier() {
 function createPowerUp(x, y) {
   if (groups.powerUps.length >= 3) return;
   const types = [
-    { name: "Rapid Fire", image: assets.images.powerUps.rapidFire },
-    { name: "Spread Shot", image: assets.images.powerUps.spreadShot, fallSpeed: 10 },
-    { name: "Slow Time", image: assets.images.powerUps.slowTime },
-    { name: "Shield", image: assets.images.powerUps.shield },
+    {
+      name: "Spread Shot",
+      image: assets.images.powerUps.spreadShot,
+      fallSpeed: 10,
+      weight: 0.2,
+    },
+    { name: "Slow Time", image: assets.images.powerUps.slowTime, weight: 0.4 },
+    { name: "Shield", image: assets.images.powerUps.shield, weight: 0.4 },
   ];
-  const typeIndex = Math.floor(random(types.length));
-  const type = types[typeIndex];
+  const typeRoll = random();
+  let cumulativeWeight = 0;
+  const type =
+    types.find((candidate) => {
+      cumulativeWeight += candidate.weight;
+      return typeRoll < cumulativeWeight;
+    }) || types[types.length - 1];
   const powerUp = createSprite(x, y, 24, 24);
   powerUp.powerUpType = type.name;
   powerUp.addImage(type.image);
@@ -807,52 +854,40 @@ function updatePowerUps() {
 
 function collectPowerUp(powerUp) {
   const expiresAt = millis() + GAME.powerUpDurationMs;
-  if (powerUp.powerUpType === "Rapid Fire") {
-    state.powerUps.rapidFireUntil = expiresAt;
-  }
   if (powerUp.powerUpType === "Spread Shot") {
     state.powerUps.spreadShotUnlocked = true;
-    state.powerUps.spreadShotActive = true;
-    state.powerUps.spreadEnergy = GAME.maxSpreadEnergy;
+    state.powerUps.spreadCharges = GAME.maxSpreadCharges;
+    state.powerUps.nextSpreadChargeAt = 0;
   }
   if (powerUp.powerUpType === "Slow Time") state.powerUps.slowTimeUntil = expiresAt;
-  if (powerUp.powerUpType === "Shield") state.powerUps.shieldHits += 3;
+  if (powerUp.powerUpType === "Shield") state.powerUps.shieldHits += 2;
   assets.sounds.life.play();
   powerUp.remove();
 }
 
-function updateSpreadEnergy() {
-  const rapidActive = millis() < state.powerUps.rapidFireUntil;
-  const firing = keyDown("space") || touchMode;
-  const consuming = state.powerUps.spreadShotActive && firing && !rapidActive;
-  const energyPerSecond = consuming
-    ? GAME.spreadRechargePerSecond - GAME.spreadDrainPerSecond
-    : GAME.spreadRechargePerSecond;
+function updateSpreadCharges() {
+  if (state.powerUps.spreadCharges >= GAME.maxSpreadCharges) {
+    state.powerUps.nextSpreadChargeAt = 0;
+    return;
+  }
+  if (state.powerUps.nextSpreadChargeAt === 0) {
+    state.powerUps.nextSpreadChargeAt = millis() + GAME.spreadPassiveRechargeMs;
+    return;
+  }
+  if (millis() >= state.powerUps.nextSpreadChargeAt) restoreSpreadCharge();
+}
 
-  state.powerUps.spreadEnergy = constrain(
-    state.powerUps.spreadEnergy + energyPerSecond / GAME.frameRate,
-    0,
-    GAME.maxSpreadEnergy
-  );
-  if (
-    state.powerUps.spreadShotActive &&
-    state.powerUps.spreadEnergy === 0
-  ) {
-    state.powerUps.spreadShotActive = false;
-  }
-  if (
-    !state.powerUps.spreadShotActive &&
-    state.powerUps.spreadEnergy >= GAME.spreadReactivationThreshold
-  ) {
-    state.powerUps.spreadShotActive = true;
-  }
+function restoreSpreadCharge() {
+  if (state.powerUps.spreadCharges >= GAME.maxSpreadCharges) return;
+  state.powerUps.spreadCharges += 1;
+  state.powerUps.nextSpreadChargeAt =
+    state.powerUps.spreadCharges < GAME.maxSpreadCharges
+      ? millis() + GAME.spreadPassiveRechargeMs
+      : 0;
 }
 
 function getActivePowerUpNames() {
   const names = [];
-  if (millis() < state.powerUps.rapidFireUntil) {
-    names.push(`RAPID FIRE ${secondsRemaining(state.powerUps.rapidFireUntil)}s`);
-  }
   if (millis() < state.powerUps.slowTimeUntil) {
     names.push(`SLOW TIME ${secondsRemaining(state.powerUps.slowTimeUntil)}s`);
   }
@@ -938,7 +973,14 @@ function getLevelConfig(levelIndex) {
 function getStarGravity(levelIndex) {
   const startingGravity = LEVELS[0].gravity;
   const configuredGravity = getLevelConfig(levelIndex).gravity;
-  return (startingGravity + (configuredGravity - startingGravity) * 0.9) * 0.92;
+  const postBossWave =
+    levelIndex > 0 && levelIndex % GAME.bossWaveInterval === 0;
+  const recoveryMultiplier = postBossWave ? 0.86 : 1;
+  return (
+    (startingGravity + (configuredGravity - startingGravity) * 0.9) *
+    0.92 *
+    recoveryMultiplier
+  );
 }
 
 function createBoss(wave) {
@@ -1172,10 +1214,10 @@ function resetGame() {
   state.nextShotAt = 0;
   state.waveNoticeUntil = millis() + 1800;
   state.bossWaves = new Set();
-  state.powerUps.rapidFireUntil = 0;
   state.powerUps.spreadShotUnlocked = true;
-  state.powerUps.spreadShotActive = true;
-  state.powerUps.spreadEnergy = GAME.maxSpreadEnergy;
+  state.powerUps.spreadCharges = GAME.maxSpreadCharges;
+  state.powerUps.spreadBurstUntil = 0;
+  state.powerUps.nextSpreadChargeAt = 0;
   state.powerUps.slowTimeUntil = 0;
   state.powerUps.shieldHits = 0;
   sprites.ship.position.x = width / 2;
@@ -1227,6 +1269,9 @@ function bindTouchControls(canvasElement) {
         touchControls[control] = true;
       }
       if (state.screen === SCREEN.PLAYING && control === "special") useSpecial();
+      if (state.screen === SCREEN.PLAYING && control === "overdrive") {
+        activateOverdrive();
+      }
       if (control === "pause" && state.screen === SCREEN.PLAYING) togglePause();
 
       // Some mobile browsers can reject capture for a second simultaneous
@@ -1313,6 +1358,7 @@ function keyPressed(event) {
   if (keyCode === 77) toggleMute();
   if (keyCode === 80 && state.screen === SCREEN.PLAYING) togglePause();
   if (keyCode === 90 && state.screen === SCREEN.PLAYING) useSpecial();
+  if (keyCode === 88 && state.screen === SCREEN.PLAYING) activateOverdrive();
   return !CONTROL_KEY_CODES.has(keyCode);
 }
 
