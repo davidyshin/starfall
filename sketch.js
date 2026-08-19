@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.6";
+const VERSION = "1.1.7";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -79,7 +79,7 @@ const state = {
   bossWaves: new Set(),
   powerUps: {
     rapidFireUntil: 0,
-    spreadShotUntil: 0,
+    spreadShotUnlocked: false,
     slowTimeUntil: 0,
     shieldHits: 0,
   },
@@ -327,7 +327,7 @@ function updateShip() {
 }
 
 function shoot() {
-  const spreadActive = millis() < state.powerUps.spreadShotUntil;
+  const spreadActive = state.powerUps.spreadShotUnlocked;
   const angles = spreadActive ? [255, 270, 285] : [270];
   angles.forEach((angle) => createBullet(angle));
   state.nextShotAt =
@@ -525,7 +525,9 @@ function createPowerUp(x, y) {
   if (groups.powerUps.length >= 3) return;
   const types = [
     { name: "Rapid Fire", image: assets.images.powerUps.rapidFire },
-    { name: "Spread Shot", image: assets.images.powerUps.spreadShot },
+    ...(!state.powerUps.spreadShotUnlocked
+      ? [{ name: "Spread Shot", image: assets.images.powerUps.spreadShot, fallSpeed: 10 }]
+      : []),
     { name: "Slow Time", image: assets.images.powerUps.slowTime },
     { name: "Shield", image: assets.images.powerUps.shield },
   ];
@@ -536,7 +538,7 @@ function createPowerUp(x, y) {
   powerUp.addImage(type.image);
   powerUp.setCollider("circle", 0, 0, GAME.powerUpSize * 0.44);
   powerUp.rotationSpeed = 4;
-  const fallSpeed = 3;
+  const fallSpeed = type.fallSpeed || 3;
   powerUp.setSpeed(fallSpeed, 90);
   powerUp.life = Math.ceil((height - y + 100) / fallSpeed);
   groups.powerUps.add(powerUp);
@@ -545,7 +547,7 @@ function createPowerUp(x, y) {
 function collectPowerUp(powerUp) {
   const expiresAt = millis() + GAME.powerUpDurationMs;
   if (powerUp.powerUpType === "Rapid Fire") state.powerUps.rapidFireUntil = expiresAt;
-  if (powerUp.powerUpType === "Spread Shot") state.powerUps.spreadShotUntil = expiresAt;
+  if (powerUp.powerUpType === "Spread Shot") state.powerUps.spreadShotUnlocked = true;
   if (powerUp.powerUpType === "Slow Time") state.powerUps.slowTimeUntil = expiresAt;
   if (powerUp.powerUpType === "Shield") state.powerUps.shieldHits += 3;
   assets.sounds.life.play();
@@ -557,9 +559,7 @@ function getActivePowerUpNames() {
   if (millis() < state.powerUps.rapidFireUntil) {
     names.push(`RAPID FIRE ${secondsRemaining(state.powerUps.rapidFireUntil)}s`);
   }
-  if (millis() < state.powerUps.spreadShotUntil) {
-    names.push(`SPREAD SHOT ${secondsRemaining(state.powerUps.spreadShotUntil)}s`);
-  }
+  if (state.powerUps.spreadShotUnlocked) names.push("SPREAD SHOT PERMANENT");
   if (millis() < state.powerUps.slowTimeUntil) {
     names.push(`SLOW TIME ${secondsRemaining(state.powerUps.slowTimeUntil)}s`);
   }
@@ -794,7 +794,7 @@ function resetGame() {
   state.waveNoticeUntil = millis() + 1800;
   state.bossWaves = new Set();
   state.powerUps.rapidFireUntil = 0;
-  state.powerUps.spreadShotUntil = 0;
+  state.powerUps.spreadShotUnlocked = false;
   state.powerUps.slowTimeUntil = 0;
   state.powerUps.shieldHits = 0;
   sprites.ship.position.x = width / 2;
