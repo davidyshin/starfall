@@ -1,6 +1,6 @@
 # Starfall
 
-**Current release: 1.1.8**
+**Current release: 1.1.9**
 
 [Play the live version](https://starfall.netlify.app)
 
@@ -33,7 +33,6 @@ The game uses vendored p5.js, p5.sound, and p5.play builds, so no package instal
 - <kbd>←</kbd> and <kbd>→</kbd>: move
 - <kbd>Space</kbd>: shoot
 - <kbd>Z</kbd>: use the special attack
-- <kbd>X</kbd>: toggle triple shot to conserve its energy
 - <kbd>P</kbd>: pause or resume
 - <kbd>M</kbd>: mute or unmute
 
@@ -45,7 +44,7 @@ Your high score is saved in the browser.
 
 - Consecutive hits build a combo multiplier of up to 5×. Taking a hit resets it.
 - Blue stars are fast, green stars are armored, and red stars weave as they fall.
-- Triple shot is available from the start and recharges while toggled off. Destroyed stars can occasionally drop an instant triple-shot refill, rapid fire, slow time, or a three-hit shield. Rapid fire grants unlimited triple shot for its duration; each pickup has a unique animated silhouette as well as color, and timed effects appear in the in-game HUD.
+- Triple shot is available from the start and continuously recharges. Once depleted, it falls back to single shots until the meter reaches 25%, then automatically reactivates. Destroyed stars can occasionally drop an instant triple-shot refill, rapid fire, slow time, or a three-hit shield. Rapid fire grants unlimited triple shot for its duration while the meter continues recharging; each pickup has a unique animated silhouette as well as color, and timed effects appear in the in-game HUD.
 - Hits charge the special meter; press <kbd>Z</kbd> when it reaches 100%.
 - Every fifth wave becomes a dedicated giant-star boss encounter with no regular stars. Bosses move and fire energy shots that only collide with the ship; one direct hit ends the run.
 - Screen shake, flashes, particles, and wave announcements provide combat feedback.

@@ -1,19 +1,20 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.8";
+const VERSION = "1.1.9";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
   GAME_OVER: "game-over",
 });
 const STORAGE_KEYS = Object.freeze({ highScore: "starfall.highScore" });
-const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 88, 90]);
+const CONTROL_KEY_CODES = new Set([32, 37, 39, 77, 80, 90]);
 const GAME = Object.freeze({
   frameRate: 40,
   maxHealth: 100,
   baseStarCount: 18,
   maxStarCount: 28,
+  maxRedStars: 3,
   shipMinX: 50,
   shipMaxX: 750,
   shipAcceleration: 3.5,
@@ -22,15 +23,23 @@ const GAME = Object.freeze({
   starSpawnMinY: -1400,
   starSpawnMaxY: -60,
   maxSpecialCharge: 100,
+  specialChargePerStar: 2,
+  specialChargePerBoss: 35,
+  specialWidth: 330,
+  specialBossDamage: 12,
   shotCooldownMs: 220,
   rapidShotCooldownMs: 80,
   maxSpreadEnergy: 100,
-  spreadEnergyPerShot: 2,
-  spreadRechargePerSecond: 12,
+  spreadActivationThreshold: 25,
+  spreadRechargePerSecond: 3.5,
+  spreadDrainPerSecond: 9.1,
   powerUpDurationMs: 12000,
   powerUpDropChance: 0.09,
   powerUpSize: 46,
   bossWaveInterval: 5,
+  bossBurstDurationMs: 1800,
+  bossBurstCooldownMs: 7500,
+  bossBurstShotCooldownMs: 520,
 });
 const LEVELS = Object.freeze([
   { score: 0, gravity: 2 },
@@ -162,6 +171,11 @@ function setup() {
   Object.keys(assets.images.powerUps).forEach((key) => {
     assets.images.powerUps[key].resize(GAME.powerUpSize, GAME.powerUpSize);
   });
+  assets.images.singleBullet = assets.images.bullet.get();
+  assets.images.singleBullet.resize(
+    Math.round(assets.images.bullet.width * 1.8),
+    Math.round(assets.images.bullet.height * 1.15)
+  );
 
   groups.stars = new Group();
   groups.bullets = new Group();
@@ -243,9 +257,6 @@ function updateGame() {
   if ((keyDown("space") || touchMode) && millis() >= state.nextShotAt) {
     shoot();
   }
-  if (keyWentDown("z")) useSpecial();
-  if (keyWentDown("x")) toggleSpreadShot();
-
   groups.bullets.overlap(groups.stars, bulletHitStar);
   groups.bullets.overlap(groups.bosses, bulletHitBoss);
   groups.stars.overlap(sprites.base, starHitBase);
@@ -254,6 +265,7 @@ function updateGame() {
   groups.enemyBullets.overlap(sprites.ship, enemyBulletHitShip);
   groups.specials.overlap(groups.stars, specialHitStar);
   groups.specials.overlap(groups.bosses, specialHitBoss);
+  groups.specials.overlap(groups.enemyBullets, specialHitEnemyBullet);
   updateLevel();
   updateHighScore();
 }
@@ -276,6 +288,8 @@ function drawGame() {
   push();
   if (millis() < state.shakeUntil) translate(random(-7, 7), random(-5, 5));
   drawSprites();
+  drawBossShotWarnings();
+  drawSpecialEffects();
   pop();
   drawShieldIndicator();
   drawHud();
@@ -301,7 +315,7 @@ function drawHud() {
   drawHudMeter("CITY", state.health, GAME.maxHealth, width / 2, 62, 230, color(70, 255, 190), false, 11);
   const specialReady = state.specialCharge >= GAME.maxSpecialCharge;
   drawHudMeter(
-    specialReady ? "SPECIAL READY [Z]" : "SPECIAL [Z]",
+    specialReady ? "NOVA READY [Z]" : "NOVA [Z]",
     state.specialCharge,
     GAME.maxSpecialCharge,
     110,
@@ -315,10 +329,8 @@ function drawHud() {
     const spreadLabel = rapidActive
       ? "TRIPLE UNLIMITED"
       : state.powerUps.spreadShotActive
-        ? "TRIPLE ON [X]"
-        : state.powerUps.spreadEnergy > 0
-          ? "TRIPLE OFF [X]"
-          : "TRIPLE EMPTY";
+        ? "TRIPLE ACTIVE"
+        : `TRIPLE CHARGING TO ${GAME.spreadActivationThreshold}%`;
     drawHudMeter(
       spreadLabel,
       state.powerUps.spreadEnergy,
@@ -336,6 +348,12 @@ function drawHud() {
 function drawBossHealthBar() {
   const boss = groups.bosses[0];
   if (!boss) return;
+  const burstActive = millis() < boss.burstUntil;
+  const bossLabel = burstActive
+    ? "BOSS // BURST"
+    : boss.attackPhase === 3
+      ? "BOSS // ENRAGED"
+      : "BOSS";
   const meterWidth = 260;
   const meterHeight = 10;
   const x = width / 2;
@@ -348,7 +366,7 @@ function drawBossHealthBar() {
   rectMode(CORNER);
   fill(40, 20, 38, 230);
   rect(x - meterWidth / 2, y - meterHeight / 2, meterWidth, meterHeight);
-  fill(255, 80, 180);
+  fill(burstActive ? color(255, 215, 70) : color(255, 80, 180));
   rect(
     x - meterWidth / 2,
     y - meterHeight / 2,
@@ -356,8 +374,47 @@ function drawBossHealthBar() {
     meterHeight
   );
   setTextStyle(8, BOLD);
-  text(`BOSS ${Math.max(0, boss.health)} / ${boss.maxHealth}`, x, y + 18);
+  text(
+    `${bossLabel} ${Math.max(0, boss.health)} / ${boss.maxHealth}`,
+    x,
+    y + 18
+  );
   pop();
+}
+
+function drawBossShotWarnings() {
+  groups.bosses.forEach((boss) => {
+    if (!boss.burstVolleyAt || millis() >= boss.burstVolleyAt) return;
+    const warningProgress = constrain(
+      1 - (boss.burstVolleyAt - millis()) / 280,
+      0,
+      1
+    );
+    const originX = boss.position.x;
+    const originY = boss.position.y + 38;
+    push();
+    strokeWeight(2);
+    [76, 90, 104].forEach((angle, angleIndex) => {
+      const radians = (angle * Math.PI) / 180;
+      const distance = height - originY + 80;
+      const endX = originX + Math.cos(radians) * distance;
+      const endY = originY + Math.sin(radians) * distance;
+      stroke(255, 70, 185, 55 + warningProgress * 150);
+      line(originX, originY, endX, endY);
+      noStroke();
+      for (let marker = 1; marker <= 5; marker += 1) {
+        const amount = marker / 6;
+        const markerSize = 3 + warningProgress * 5;
+        fill(angleIndex === 1 ? color(255, 225, 90, 220) : color(255, 95, 200, 210));
+        ellipse(
+          originX + (endX - originX) * amount,
+          originY + (endY - originY) * amount,
+          markerSize
+        );
+      }
+    });
+    pop();
+  });
 }
 
 function drawHudMeter(label, value, maximum, x, y, meterWidth, meterColor, pulse, height) {
@@ -442,14 +499,7 @@ function shoot() {
     rapidActive ||
     (state.powerUps.spreadShotUnlocked && state.powerUps.spreadShotActive);
   const angles = spreadActive ? [255, 270, 285] : [270];
-  angles.forEach((angle) => createBullet(angle));
-  if (spreadActive && !rapidActive) {
-    state.powerUps.spreadEnergy = Math.max(
-      0,
-      state.powerUps.spreadEnergy - GAME.spreadEnergyPerShot
-    );
-    if (state.powerUps.spreadEnergy === 0) state.powerUps.spreadShotActive = false;
-  }
+  angles.forEach((angle) => createBullet(angle, !spreadActive));
   let cooldown = GAME.shotCooldownMs;
   if (rapidActive) cooldown = GAME.rapidShotCooldownMs;
   state.nextShotAt = millis() + cooldown;
@@ -457,15 +507,23 @@ function shoot() {
   assets.sounds.bullet.play();
 }
 
-function createBullet(angle) {
+function createBullet(angle, isSingleShot) {
   const bullet = createSprite(
     sprites.ship.position.x,
     sprites.ship.position.y - 10,
     8,
     18
   );
-  bullet.addImage(assets.images.bullet);
-  bullet.setCollider("rectangle", 0, 0, 7, 17);
+  bullet.addImage(
+    isSingleShot ? assets.images.singleBullet : assets.images.bullet
+  );
+  bullet.setCollider(
+    "rectangle",
+    0,
+    0,
+    isSingleShot ? 14 : 7,
+    isSingleShot ? 20 : 17
+  );
   bullet.setSpeed(10, angle);
   bullet.life = 70;
   groups.bullets.add(bullet);
@@ -484,13 +542,78 @@ function removeSpritesAboveCanvas(group) {
 
 function useSpecial() {
   if (state.specialCharge < GAME.maxSpecialCharge) return;
-  const special = createSprite(width / 2, sprites.ship.position.y, width, 1.5);
-  special.setCollider("rectangle", 0, 0, width, 4);
-  special.setSpeed(9, 270);
+  const special = createSprite(
+    sprites.ship.position.x,
+    sprites.ship.position.y - 22,
+    GAME.specialWidth,
+    18
+  );
+  special.setCollider("rectangle", 0, 0, GAME.specialWidth - 20, 20);
+  special.setSpeed(10.5, 270);
   special.life = 70;
+  special.visible = false;
+  special.pulseOffset = random(TWO_PI);
   groups.specials.add(special);
   assets.sounds.special.play();
   state.specialCharge = 0;
+  state.shakeUntil = millis() + 180;
+  state.flashUntil = millis() + 90;
+}
+
+function drawSpecialEffects() {
+  groups.specials.forEach((special, specialIndex) => {
+    const pulse = 0.75 + Math.sin(frameCount * 0.45 + special.pulseOffset) * 0.25;
+    const x = special.position.x;
+    const y = special.position.y;
+    const halfWidth = GAME.specialWidth / 2;
+    push();
+    rectMode(CENTER);
+    noStroke();
+
+    // Magenta fringe and cyan body echo the game's power-up and HUD palette.
+    fill(255, 55, 185, 24);
+    quad(
+      x - halfWidth - 24, y + 14,
+      x, y - 24 - pulse * 8,
+      x + halfWidth + 24, y + 14,
+      x, y + 72
+    );
+    fill(36, 135, 255, 42);
+    quad(
+      x - halfWidth - 12, y + 8,
+      x, y - 17 - pulse * 5,
+      x + halfWidth + 12, y + 8,
+      x, y + 48
+    );
+    fill(45, 220, 255, 105);
+    quad(
+      x - halfWidth, y + 3,
+      x, y - 12 - pulse * 4,
+      x + halfWidth, y + 3,
+      x, y + 27
+    );
+
+    // Pixel-stepped wings give the wave a sharper retro silhouette.
+    fill(255, 70, 190, 150);
+    rect(x - halfWidth + 28, y + 7, 54, 6);
+    rect(x + halfWidth - 28, y + 7, 54, 6);
+    fill(105, 238, 255, 220);
+    rect(x, y, GAME.specialWidth, 9 + pulse * 5);
+    fill(225, 255, 255, 245);
+    rect(x, y - 2, GAME.specialWidth - 28, 3 + pulse * 3);
+
+    // Orbiting four-point sparks make each frame feel alive without an asset.
+    for (let sparkIndex = 0; sparkIndex < 7; sparkIndex += 1) {
+      const phase = frameCount * 0.17 + sparkIndex * 1.9 + specialIndex;
+      const sparkX = x + Math.sin(phase) * (halfWidth + 13);
+      const sparkY = y + 18 + ((sparkIndex * 19 + frameCount * 3) % 54);
+      const sparkSize = 3 + (sparkIndex % 3) * 2;
+      fill(sparkIndex % 2 === 0 ? color(255, 85, 195, 190) : color(145, 245, 255, 210));
+      rect(sparkX, sparkY, sparkSize, sparkSize * 3);
+      rect(sparkX, sparkY, sparkSize * 3, sparkSize);
+    }
+    pop();
+  });
 }
 
 function createStar() {
@@ -515,7 +638,11 @@ function createStar() {
 
 function chooseStarType() {
   const roll = random();
-  if (state.levelIndex >= 7 && roll < 0.12) {
+  if (
+    state.levelIndex >= 7 &&
+    roll < 0.12 &&
+    countStarsOfType("red") < GAME.maxRedStars
+  ) {
     return {
       name: "red",
       animation: "redStar",
@@ -553,6 +680,14 @@ function chooseStarType() {
     speedMultiplier: 1,
     sizeScale: 0.9,
   };
+}
+
+function countStarsOfType(type) {
+  let count = 0;
+  groups.stars.forEach((star) => {
+    if (star.starType === type) count += 1;
+  });
+  return count;
 }
 
 function updateStars() {
@@ -632,7 +767,7 @@ function destroyStar(star, awardsSpecialCharge) {
   if (awardsSpecialCharge) {
     state.specialCharge = Math.min(
       GAME.maxSpecialCharge,
-      state.specialCharge + points * 5
+      state.specialCharge + GAME.specialChargePerStar
     );
   }
   if (random() < GAME.powerUpDropChance) createPowerUp(x, y);
@@ -671,7 +806,9 @@ function updatePowerUps() {
 
 function collectPowerUp(powerUp) {
   const expiresAt = millis() + GAME.powerUpDurationMs;
-  if (powerUp.powerUpType === "Rapid Fire") state.powerUps.rapidFireUntil = expiresAt;
+  if (powerUp.powerUpType === "Rapid Fire") {
+    state.powerUps.rapidFireUntil = expiresAt;
+  }
   if (powerUp.powerUpType === "Spread Shot") {
     state.powerUps.spreadShotUnlocked = true;
     state.powerUps.spreadShotActive = true;
@@ -683,25 +820,28 @@ function collectPowerUp(powerUp) {
   powerUp.remove();
 }
 
-function toggleSpreadShot() {
-  if (state.powerUps.spreadShotActive) {
-    state.powerUps.spreadShotActive = false;
-    return;
-  }
-  if (state.powerUps.spreadEnergy > 0) state.powerUps.spreadShotActive = true;
-}
-
 function updateSpreadEnergy() {
-  if (
-    state.powerUps.spreadShotActive ||
-    state.powerUps.spreadEnergy >= GAME.maxSpreadEnergy
-  ) {
-    return;
-  }
-  state.powerUps.spreadEnergy = Math.min(
-    GAME.maxSpreadEnergy,
-    state.powerUps.spreadEnergy + GAME.spreadRechargePerSecond / GAME.frameRate
+  const rapidActive = millis() < state.powerUps.rapidFireUntil;
+  const firing = keyDown("space") || touchMode;
+  const consuming = state.powerUps.spreadShotActive && firing && !rapidActive;
+  const energyPerSecond = consuming
+    ? GAME.spreadRechargePerSecond - GAME.spreadDrainPerSecond
+    : GAME.spreadRechargePerSecond;
+
+  state.powerUps.spreadEnergy = constrain(
+    state.powerUps.spreadEnergy + energyPerSecond / GAME.frameRate,
+    0,
+    GAME.maxSpreadEnergy
   );
+  if (state.powerUps.spreadEnergy === 0) {
+    state.powerUps.spreadShotActive = false;
+  }
+  if (
+    !state.powerUps.spreadShotActive &&
+    state.powerUps.spreadEnergy >= GAME.spreadActivationThreshold
+  ) {
+    state.powerUps.spreadShotActive = true;
+  }
 }
 
 function getActivePowerUpNames() {
@@ -794,7 +934,7 @@ function getLevelConfig(levelIndex) {
 function getStarGravity(levelIndex) {
   const startingGravity = LEVELS[0].gravity;
   const configuredGravity = getLevelConfig(levelIndex).gravity;
-  return (startingGravity + (configuredGravity - startingGravity) * 0.9) * 1.05;
+  return (startingGravity + (configuredGravity - startingGravity) * 0.9) * 0.92;
 }
 
 function createBoss(wave) {
@@ -810,30 +950,78 @@ function createBoss(wave) {
   boss.phase = 0;
   boss.nextDamageAt = 0;
   boss.nextShotAt = millis() + 1250;
+  boss.nextBurstAt = Number.POSITIVE_INFINITY;
+  boss.burstUntil = 0;
+  boss.burstVolleyAt = 0;
+  boss.attackPhase = 1;
   boss.setSpeed(1.8, 90);
   groups.bosses.add(boss);
 }
 
 function updateBosses() {
   groups.bosses.forEach((boss) => {
+    const now = millis();
+    const healthRatio = boss.health / boss.maxHealth;
+    const attackPhase = healthRatio <= 0.35 ? 3 : healthRatio <= 0.7 ? 2 : 1;
+    if (attackPhase !== boss.attackPhase) {
+      boss.attackPhase = attackPhase;
+      boss.nextBurstAt =
+        Math.max(now, boss.burstUntil) + (attackPhase === 3 ? 800 : 1500);
+      state.flashUntil = now + 120;
+    }
+    if (boss.attackPhase >= 2 && now >= boss.nextBurstAt) {
+      boss.burstUntil = now + GAME.bossBurstDurationMs;
+      const burstCooldown =
+        boss.attackPhase === 3 ? 4000 : GAME.bossBurstCooldownMs;
+      boss.nextBurstAt = boss.burstUntil + burstCooldown;
+      boss.nextShotAt = now;
+      state.flashUntil = now + 100;
+      state.shakeUntil = now + 180;
+    }
+    const burstActive = now < boss.burstUntil;
+    boss.rotationSpeed = burstActive
+      ? boss.attackPhase === 3
+        ? -6
+        : -4.5
+      : -1.2;
+
+    if (!burstActive) boss.burstVolleyAt = 0;
+
     if (boss.position.y >= 145) {
       boss.velocity.y = 0;
-      boss.phase += 0.025;
+      boss.phase += burstActive
+        ? boss.attackPhase === 3
+          ? 0.08
+          : 0.065
+        : 0.025;
       boss.position.x = width / 2 + Math.sin(boss.phase) * 260;
     }
-    if (millis() >= boss.nextShotAt) {
-      createEnemyBullet(boss.position.x, boss.position.y + 35);
-      boss.nextShotAt = millis() + 1100;
+    if (burstActive) {
+      if (boss.burstVolleyAt && now >= boss.burstVolleyAt) {
+        [76, 90, 104].forEach((angle) => {
+          createEnemyBullet(boss.position.x, boss.position.y + 35, angle);
+        });
+        boss.burstVolleyAt = 0;
+      }
+      if (!boss.burstVolleyAt && now >= boss.nextShotAt) {
+        boss.burstVolleyAt = now + 280;
+        boss.nextShotAt =
+          now +
+          (boss.attackPhase === 3 ? 400 : GAME.bossBurstShotCooldownMs);
+      }
+    } else if (now >= boss.nextShotAt) {
+      createEnemyBullet(boss.position.x, boss.position.y + 35, 90);
+      boss.nextShotAt = now + 1100;
     }
   });
 }
 
-function createEnemyBullet(x, y) {
+function createEnemyBullet(x, y, angle = 90) {
   const projectile = createSprite(x, y, 12, 18);
   projectile.addImage(assets.images.bossLaser);
   projectile.scale = 0.5;
   projectile.setCollider("rectangle", 0, 0, 22, 44);
-  projectile.setSpeed(6, 90);
+  projectile.setSpeed(6, angle);
   projectile.life = 100;
   groups.enemyBullets.add(projectile);
 }
@@ -849,7 +1037,13 @@ function bulletHitBoss(bullet, boss) {
 function specialHitBoss(special, boss) {
   if (special.bossHit || boss.removed || boss.destroyed) return;
   special.bossHit = true;
-  damageBoss(boss, 8, false);
+  damageBoss(boss, GAME.specialBossDamage, false);
+}
+
+function specialHitEnemyBullet(_special, projectile) {
+  if (projectile.removed) return;
+  createParticles(projectile.position.x, projectile.position.y, 4, false);
+  projectile.remove();
 }
 
 function damageBoss(boss, damage, awardsSpecialCharge) {
@@ -863,7 +1057,12 @@ function damageBoss(boss, damage, awardsSpecialCharge) {
   createParticles(boss.position.x, boss.position.y, 50, true);
   boss.remove();
   state.score += points * comboMultiplier();
-  if (awardsSpecialCharge) state.specialCharge = GAME.maxSpecialCharge;
+  if (awardsSpecialCharge) {
+    state.specialCharge = Math.min(
+      GAME.maxSpecialCharge,
+      state.specialCharge + GAME.specialChargePerBoss
+    );
+  }
   state.shakeUntil = millis() + 700;
 }
 
@@ -995,14 +1194,20 @@ function bindTouchControls(canvasElement) {
 
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
-      button.setPointerCapture(event.pointerId);
 
       if (control === "left" || control === "right") {
         touchControls[control] = true;
       }
       if (state.screen === SCREEN.PLAYING && control === "special") useSpecial();
-      if (state.screen === SCREEN.PLAYING && control === "spread") toggleSpreadShot();
       if (control === "pause" && state.screen === SCREEN.PLAYING) togglePause();
+
+      // Some mobile browsers can reject capture for a second simultaneous
+      // pointer. The control action must still happen while movement is held.
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch (_error) {
+        // The document-level pointer release below clears movement as fallback.
+      }
     });
 
     const releaseControl = () => {
@@ -1013,6 +1218,11 @@ function bindTouchControls(canvasElement) {
     button.addEventListener("pointerup", releaseControl);
     button.addEventListener("pointercancel", releaseControl);
     button.addEventListener("lostpointercapture", releaseControl);
+  });
+
+  document.addEventListener("pointerup", (event) => {
+    const control = event.target.closest?.("[data-control]")?.dataset.control;
+    if (control === "left" || control === "right") touchControls[control] = false;
   });
 
   canvasElement.addEventListener("pointerdown", () => {
@@ -1074,6 +1284,7 @@ function keyPressed(event) {
   if (event && event.repeat) return false;
   if (keyCode === 77) toggleMute();
   if (keyCode === 80 && state.screen === SCREEN.PLAYING) togglePause();
+  if (keyCode === 90 && state.screen === SCREEN.PLAYING) useSpecial();
   return !CONTROL_KEY_CODES.has(keyCode);
 }
 

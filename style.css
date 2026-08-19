@@ -417,11 +417,9 @@ canvas {
 .touch-device .touch-controls [data-control="special"] {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 8.25rem);
-}
-
-.touch-device .touch-controls [data-control="spread"] {
-    right: max(0.75rem, env(safe-area-inset-right));
-    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 13.5rem);
+    border-color: #b83b91;
+    color: #ff8ed8;
+    box-shadow: 3px 3px 0 #531c48;
 }
 
 .touch-device .touch-controls [data-control="special"]:active {
