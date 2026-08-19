@@ -64,6 +64,8 @@ body {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .touch-controls button:active {
@@ -484,30 +486,6 @@ canvas {
     max-width: 24rem;
     color: #879da0;
     font-size: 0.52rem;
-    line-height: 1.8;
-}
-
-.orientation-button {
-    padding: 0.75rem 1rem;
-    border: 2px solid #315b65;
-    border-radius: 0;
-    color: #a9e4e1;
-    font-family: "Starfall Pixel", monospace;
-    font-size: 0.55rem;
-    text-transform: uppercase;
-    background: #050b0d;
-    box-shadow: 3px 3px 0 #102a31;
-}
-
-.orientation-status:empty {
-    display: none;
-}
-
-.touch-device.portrait-mode .orientation-status {
-    max-width: 24rem;
-    color: #879da0;
-    font-family: "Starfall Pixel", monospace;
-    font-size: 0.45rem;
     line-height: 1.8;
 }
 

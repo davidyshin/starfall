@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.4";
+const VERSION = "1.1.5";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -846,7 +846,10 @@ function updateExternalUi() {
 }
 
 function bindTouchControls(canvasElement) {
-  document.querySelectorAll("[data-control]").forEach((button) => {
+  const controls = document.querySelector(".touch-controls");
+  controls.addEventListener("contextmenu", (event) => event.preventDefault());
+
+  controls.querySelectorAll("[data-control]").forEach((button) => {
     const control = button.dataset.control;
 
     button.addEventListener("pointerdown", (event) => {
@@ -907,8 +910,6 @@ function bindGuideModal() {
 }
 
 function bindOrientationHandling() {
-  const orientationButton = document.getElementById("orientation-button");
-  const orientationStatus = document.getElementById("orientation-status");
   const handleOrientation = () => {
     const isPortrait = touchMode && window.innerHeight > window.innerWidth;
     document.documentElement.classList.toggle("portrait-mode", isPortrait);
@@ -924,22 +925,6 @@ function bindOrientationHandling() {
 
   window.addEventListener("resize", handleOrientation);
   window.addEventListener("orientationchange", handleOrientation);
-  orientationButton.addEventListener("click", async () => {
-    orientationStatus.textContent = "";
-
-    try {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-      }
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
-      } else {
-        throw new Error("Orientation lock unavailable");
-      }
-    } catch (_error) {
-      orientationStatus.textContent = "Your browser requires you to rotate the device manually.";
-    }
-  });
   handleOrientation();
 }
 
