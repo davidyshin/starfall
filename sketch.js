@@ -1,7 +1,7 @@
 /* global Group, LEFT, CENTER, BOLD, NORMAL, PI, TWO_PI */
 
 const CANVAS = Object.freeze({ width: 800, height: 600 });
-const VERSION = "1.1.5";
+const VERSION = "1.1.6";
 const SCREEN = Object.freeze({
   START: "start",
   PLAYING: "playing",
@@ -848,6 +848,9 @@ function updateExternalUi() {
 function bindTouchControls(canvasElement) {
   const controls = document.querySelector(".touch-controls");
   controls.addEventListener("contextmenu", (event) => event.preventDefault());
+  controls.addEventListener("dblclick", (event) => event.preventDefault());
+  canvasElement.addEventListener("dblclick", (event) => event.preventDefault());
+  document.addEventListener("gesturestart", (event) => event.preventDefault());
 
   controls.querySelectorAll("[data-control]").forEach((button) => {
     const control = button.dataset.control;
